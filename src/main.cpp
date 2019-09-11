@@ -9,8 +9,14 @@
 int main()
 {
     auto biosRom = std::make_unique<FileReader<256>>("roms/dmg_boot.bin");
-    VirtualMemory virtualMemory(std::move(biosRom));
-//    CPU cpu {};
+    auto virtualMemory = std::make_unique<VirtualMemory>(std::move(biosRom));
+
+    CPU cpu(std::move(virtualMemory));
+
+    while (true)
+    {
+        cpu.nextTick();
+    }
 
     return 0;
 }

@@ -16,11 +16,14 @@
  * This is especially useful and easy to use for a gameboy emulator:
  * - Boot loader is 256KB
  * - Game are max 2MB
+ *
+ * Once a file is loaded, it is not editable.
  */
 template <const size_t size>
 class FileReader
 {
 public:
+    // A non-mutable view of the data
     const uint8 * const data = mutable_data;
 
     /**
@@ -38,6 +41,11 @@ public:
 
         fileStream.read(reinterpret_cast<int8*>(mutable_data), size);
     }
+
+    // Copy would be a costly operation and may overflow stack.
+    // Therefore it is forbidden.
+    FileReader(const FileReader&) = delete;
+    FileReader& operator=(const FileReader&) = delete;
 
 private:
     uint8 mutable_data[size] {};
