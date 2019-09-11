@@ -26,11 +26,11 @@ public:
 
 private:
     /**
-     * Execute the given opcode.
+     * Decode then Execute the given opcode.
      * @param opcode opcode to execute
-     * @return cycles consumed to execute opcode
+     * @return cycles consumed to fetch, decode and execute opcode
      */
-    uint16 execute(uint8 opcode);
+    uint16 decodeThenExecute(uint8 opcode);
 
     /**
      * Fetch a byte from memory
