@@ -66,6 +66,7 @@ private:
     std::unique_ptr<VirtualMemory> memory;
 
     // Here live all processor operations.
+    // They all return cycle count consumed
     // Some naming convention si really helpful:
     // - r8 means we apply operation from an 8bit register
     // - r16 means we apply operation from a 16bit register
@@ -75,6 +76,14 @@ private:
 
     uint16 d16Load(uint16 &reg);
     uint16 d16Load(uint8 &reg1, uint8 &reg2);
+
+    uint16 r8and(uint8 reg);
+    uint16 m8and(uint16 addr);
+    uint16 d8and();
+
+    uint16 r8or(uint8 reg);
+    uint16 m8or(uint16 addr);
+    uint16 d8or();
 
     uint16 r8xor(uint8 reg);
     uint16 m8xor(uint16 addr);
