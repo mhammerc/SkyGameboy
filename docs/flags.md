@@ -35,9 +35,11 @@ So on, the ALU keep track if it needs to carry a bit between each operation.
 Half-carry for 8bit operation:
 
 ```c
-// Keep only first four bits, make addition and check if fifth bit is set.
-// If fifth bit is set, then there is half carry.
-if((((A & 0xfu) + (reg & 0xfu)) & 0x10u) == 0x10u)
+A + reg -> regular sum
+A ^ reg -> sum without carrying 
+(A ^ reg) ^ (A + reg) -> keep only bits which were caried
+^ 0x10 -> finally check the carry bit we're interested in
+if ((((A ^ reg) ^ (A + reg)) ^ 0x10) != 0)
 {
     F |= FFlags.H;
 }
@@ -45,9 +47,7 @@ if((((A & 0xfu) + (reg & 0xfu)) & 0x10u) == 0x10u)
 
 Same apply for 16bit operation:
 ```c
-// Keep only first eleventh bits, ...
-// If twelveth bit is set, then tere is half carry
-if((((HL & 0xfffu) + (reg & 0xfffu)) & 0x1000u) == 0x1000u)
+if (((HL ^ reg ^ (HL + reg)) ^ 0x1000) != 0)
 {
     F |= FFlags.H;
 }

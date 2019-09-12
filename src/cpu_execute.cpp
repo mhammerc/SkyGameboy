@@ -23,7 +23,7 @@ uint16 CPU::r8add(uint8 reg)
     }
 
     // half-carry
-    if((((A & 0xfu) + (reg & 0xfu)) & 0x10u) == 0x10u)
+    if (((A ^ reg ^ (A + reg)) ^ 0x10) != 0)
     {
         F |= FFlags.H;
     }
@@ -64,7 +64,7 @@ uint16 CPU::r16add(uint16 reg)
     }
 
     // half-carry
-    if((((HL & 0xfffu) + (reg & 0xfffu)) & 0x1000u) == 0x1000u)
+    if (((HL ^ reg ^ (HL + reg)) ^ 0x1000) != 0)
     {
         F |= FFlags.H;
     }
@@ -99,7 +99,7 @@ uint16 CPU::r8adc(uint8 reg)
     }
 
     // half-carry
-    if((((A & 0xfu) + (reg & 0xfu)) & 0x10u) == 0x10u)
+    if (((A ^ reg ^ (A + reg)) ^ 0x10) != 0)
     {
         F |= FFlags.H;
     }
