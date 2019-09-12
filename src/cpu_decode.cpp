@@ -86,6 +86,41 @@ uint16 CPU::decodeThenExecute(const uint8 opcode)
         case 0xAF: return r8xor(A);
         case 0xEE: return d8xor();
 
+        case 0xB8: return r8cp(B);
+        case 0xB9: return r8cp(C);
+        case 0xBA: return r8cp(D);
+        case 0xBB: return r8cp(E);
+        case 0xBC: return r8cp(H);
+        case 0xBD: return r8cp(L);
+        case 0xBE: return m8cp(HL);
+        case 0xBF: return r8cp(A);
+        case 0xFE: return d8cp();
+
+        case 0x04: return r8inc(B);
+        case 0x0C: return r8inc(C);
+        case 0x14: return r8inc(D);
+        case 0x1C: return r8inc(E);
+        case 0x24: return r8inc(H);
+        case 0x2C: return r8inc(L);
+        case 0x34: return m8inc(HL);
+        case 0x3C: return r8inc(A);
+        case 0x03: return r16inc(BC);
+        case 0x13: return r16inc(DE);
+        case 0x23: return r16inc(HL);
+        case 0x33: return r16inc(SP);
+
+        case 0x05: return r8dec(B);
+        case 0x0D: return r8dec(C);
+        case 0x15: return r8dec(D);
+        case 0x1D: return r8dec(E);
+        case 0x25: return r8dec(H);
+        case 0x2D: return r8dec(L);
+        case 0x35: return m8dec(HL);
+        case 0x3D: return r8dec(A);
+        case 0x0B: return r16dec(BC);
+        case 0x1B: return r16dec(DE);
+        case 0x2B: return r16dec(HL);
+        case 0x3B: return r16dec(SP);
 
         default:
         {

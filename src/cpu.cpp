@@ -21,3 +21,8 @@ uint16 CPU::fetch16(const uint16 addr) const
     const uint8 b2 = memory->read8(addr + 1);
     return bytesToWordLE(b1, b2);
 }
+
+void CPU::write8(uint16 addr, uint8 value)
+{
+    memory->write8(addr, value);
+}

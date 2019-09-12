@@ -134,7 +134,7 @@ uint16 CPU::r8sub(uint8 reg)
     F |= FFlags.N;
 
     // carry
-    if (reg >= A)
+    if (reg > A)
     {
         F |= FFlags.C;
     }
@@ -181,7 +181,7 @@ uint16 CPU::r8sbc(uint8 reg)
     }
 
     // carry
-    if (reg >= A || (carry && reg == 0))
+    if (reg > A || (carry && reg == 0))
     {
         F |= FFlags.C;
     }
@@ -295,5 +295,139 @@ uint16 CPU::d8xor()
     const uint8 value = fetch8(PC);
     ++PC;
     r8xor(value);
+    return 8;
+}
+
+uint16 CPU::r8cp(uint8 reg)
+{
+    F = 0;
+    F |= FFlags.N;
+
+    // carry
+    if (reg > A)
+    {
+        F |= FFlags.C;
+    }
+
+    // half-carry
+    if (((A ^ reg ^ (A - reg)) ^ 0x10) != 0)
+    {
+        F |= FFlags.H;
+    }
+
+    if (A - reg == 0)
+    {
+        F |= FFlags.Z;
+    }
+
+    return 4;
+}
+
+uint16 CPU::m8cp(uint16 addr)
+{
+    const uint8 value = fetch8(addr + 0xFF00);
+    r8cp(value);
+    return 8;
+}
+
+uint16 CPU::d8cp()
+{
+    const uint8 value = fetch8(PC);
+    ++PC;
+    r8cp(value);
+    return 8;
+}
+
+uint16 CPU::r8inc(uint8 &reg)
+{
+    F &= ~FFlags.N;
+
+    if (((reg ^ 1 ^ (reg + 1)) ^ 0x10) != 0)
+    {
+        F |= FFlags.H;
+    }
+
+    ++reg;
+
+    if (reg == 0)
+    {
+        F |= FFlags.Z;
+    }
+
+    return 4;
+}
+
+uint16 CPU::m8inc(uint16 addr)
+{
+    addr += 0xFF00;
+    uint8 value = fetch8(addr);
+    r8inc(value);
+    write8(addr, value);
+    return 12;
+}
+
+uint16 CPU::r16inc(uint16 &reg)
+{
+    F &= ~FFlags.N;
+
+    if (((reg ^ 1 ^ (reg + 1)) ^ 0x10) != 0)
+    {
+        F |= FFlags.H;
+    }
+
+    ++reg;
+
+    if (reg == 0)
+    {
+        F |= FFlags.Z;
+    }
+
+    return 8;
+}
+
+uint16 CPU::r8dec(uint8 &reg)
+{
+    F |= FFlags.N;
+
+    if (((reg ^ 1 ^ (reg - 1)) ^ 0x10) != 0)
+    {
+        F |= FFlags.H;
+    }
+
+    --reg;
+
+    if (reg == 0)
+    {
+        F |= FFlags.Z;
+    }
+
+    return 4;
+}
+
+uint16 CPU::m8dec(uint16 addr)
+{
+    addr += 0xFF00;
+    uint8 value = fetch8(addr);
+    r8dec(value);
+    write8(addr, value);
+    return 12;
+}
+
+uint16 CPU::r16dec(uint16 &reg)
+{
+    F |= FFlags.N;
+
+    if (((reg ^ 1 ^ (reg - 1)) ^ 0x10) != 0)
+    {
+        F |= FFlags.H;
+    }
+
+    --reg;
+
+    if (reg == 0)
+    {
+        F |= FFlags.Z;
+    }
+
     return 8;
 }

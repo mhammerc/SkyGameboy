@@ -46,6 +46,13 @@ private:
      */
     [[nodiscard]] uint16 fetch16(uint16 addr) const;
 
+    /**
+     * Write a byte to memory
+     * @param addr Address of the byte to write
+     * @param value Value to write
+     */
+    void write8(uint16 addr, uint8 value);
+
     // Registers can be 16bit read/write or 8bit read/write.
     // To make that easy:
     // - `AF` is the full 16bit value
@@ -123,6 +130,18 @@ private:
     uint16 r8xor(uint8 reg);
     uint16 m8xor(uint16 addr);
     uint16 d8xor();
+
+    uint16 r8cp(uint8 reg);
+    uint16 m8cp(uint16 addr);
+    uint16 d8cp();
+
+    uint16 r8inc(uint8 &reg);
+    uint16 m8inc(uint16 addr);
+    uint16 r16inc(uint16 &reg);
+
+    uint16 r8dec(uint8 &reg);
+    uint16 m8dec(uint16 addr);
+    uint16 r16dec(uint16 &reg);
 };
 
 
