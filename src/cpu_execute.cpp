@@ -16,13 +16,13 @@ uint16 CPU::d16Load(uint16 &reg)
 uint16 CPU::r8add(uint8 reg)
 {
     F = 0;
-    // Check carry
-    if (A + reg < A || A == reg)
+    // carry
+    if (A + reg < A)
     {
         F |= FFlags.C;
     }
 
-    // Check half-carry
+    // half-carry
     if((((A & 0xfu) + (reg & 0xfu)) & 0x10u) == 0x10u)
     {
         F |= FFlags.H;
@@ -57,14 +57,14 @@ uint16 CPU::r16add(uint16 reg)
     F &= ~FFlags.N;
     F &= ~FFlags.H;
     F &= ~FFlags.C;
-    // Check carry
-    if (HL + reg < HL || HL == reg)
+    // carry
+    if (HL + reg < HL)
     {
         F |= FFlags.C;
     }
 
-    // Check half-carry
-    if((((HL & 0xfu) + (reg & 0xfu)) & 0x10u) == 0x10u)
+    // half-carry
+    if((((HL & 0xfffu) + (reg & 0xfffu)) & 0x1000u) == 0x1000u)
     {
         F |= FFlags.H;
     }
