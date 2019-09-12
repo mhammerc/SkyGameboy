@@ -100,6 +100,10 @@ private:
     uint16 r16add(uint16 reg);
     uint16 d16add();
 
+    uint16 r8adc(uint8 reg);
+    uint16 m8adc(uint16 addr);
+    uint16 d8adc();
+
     uint16 r8and(uint8 reg);
     uint16 m8and(uint16 addr);
     uint16 d8and();

@@ -82,6 +82,52 @@ uint16 CPU::d16add()
     return 16;
 }
 
+uint16 CPU::r8adc(uint8 reg)
+{
+    bool carry = (F & FFlags.C) != 0;
+    F = 0;
+
+    if (carry)
+    {
+        ++reg;
+    }
+
+    // carry
+    if (A + reg < A || (carry && reg == 0))
+    {
+        F |= FFlags.C;
+    }
+
+    // half-carry
+    if((((A & 0xfu) + (reg & 0xfu)) & 0x10u) == 0x10u)
+    {
+        F |= FFlags.H;
+    }
+
+    A += reg;
+
+    if (A == 0)
+    {
+        F |= FFlags.Z;
+    }
+    return 4;
+}
+
+uint16 CPU::m8adc(uint16 addr)
+{
+    const uint8 value = fetch8(addr + 0xFF00);
+    r8adc(value);
+    return 8;
+}
+
+uint16 CPU::d8adc()
+{
+    const uint8 value = fetch8(PC);
+    ++PC;
+    r8adc(value);
+    return 8;
+}
+
 uint16 CPU::r8and(uint8 reg)
 {
     A = A & reg;
