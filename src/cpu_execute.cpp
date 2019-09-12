@@ -140,7 +140,7 @@ uint16 CPU::r8sub(uint8 reg)
     }
 
     // half-carry
-    if (((A ^ reg ^ (A - reg)) ^ 0x10) != 0)
+    if (((A ^ (-reg) ^ (A - reg)) ^ 0x10) != 0)
     {
         F |= FFlags.H;
     }
@@ -187,7 +187,7 @@ uint16 CPU::r8sbc(uint8 reg)
     }
 
     // half-carry
-    if (((A ^ reg ^ (A + reg)) ^ 0x10) != 0)
+    if (((A ^ (-reg) ^ (A + reg)) ^ 0x10) != 0)
     {
         F |= FFlags.H;
     }
@@ -310,7 +310,7 @@ uint16 CPU::r8cp(uint8 reg)
     }
 
     // half-carry
-    if (((A ^ reg ^ (A - reg)) ^ 0x10) != 0)
+    if (((A ^ (-reg) ^ (A - reg)) ^ 0x10) != 0)
     {
         F |= FFlags.H;
     }
@@ -389,7 +389,7 @@ uint16 CPU::r8dec(uint8 &reg)
 {
     F |= FFlags.N;
 
-    if (((reg ^ 1 ^ (reg - 1)) ^ 0x10) != 0)
+    if (((reg ^ (-static_cast<uint8>(1)) ^ (reg - 1)) ^ 0x10) != 0)
     {
         F |= FFlags.H;
     }
@@ -417,7 +417,7 @@ uint16 CPU::r16dec(uint16 &reg)
 {
     F |= FFlags.N;
 
-    if (((reg ^ 1 ^ (reg - 1)) ^ 0x10) != 0)
+    if (((reg ^ (-static_cast<uint8>(1)) ^ (reg - 1)) ^ 0x10) != 0)
     {
         F |= FFlags.H;
     }
