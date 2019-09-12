@@ -104,6 +104,14 @@ private:
     uint16 m8adc(uint16 addr);
     uint16 d8adc();
 
+    uint16 r8sub(uint8 reg);
+    uint16 m8sub(uint16 addr);
+    uint16 d8sub();
+
+    uint16 r8sbc(uint8 reg);
+    uint16 m8sbc(uint16 addr);
+    uint16 d8sbc();
+
     uint16 r8and(uint8 reg);
     uint16 m8and(uint16 addr);
     uint16 d8and();

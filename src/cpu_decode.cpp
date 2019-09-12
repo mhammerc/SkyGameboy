@@ -36,6 +36,26 @@ uint16 CPU::decodeThenExecute(const uint8 opcode)
         case 0x8F: return r8adc(A);
         case 0xCE: return d8adc();
 
+        case 0x90: return r8sub(B);
+        case 0x91: return r8sub(C);
+        case 0x92: return r8sub(D);
+        case 0x93: return r8sub(E);
+        case 0x94: return r8sub(H);
+        case 0x95: return r8sub(L);
+        case 0x96: return m8sub(HL);
+        case 0x97: return r8sub(A);
+        case 0xD6: return d8sub();
+
+        case 0x98: return r8sbc(B);
+        case 0x99: return r8sbc(C);
+        case 0x9A: return r8sbc(D);
+        case 0x9B: return r8sbc(E);
+        case 0x9C: return r8sbc(H);
+        case 0x9D: return r8sbc(L);
+        case 0x9E: return m8sbc(HL);
+        case 0x9F: return r8sbc(A);
+        case 0xDE: return d8sbc();
+
         case 0xA0: return r8and(B);
         case 0xA1: return r8and(C);
         case 0xA2: return r8and(D);

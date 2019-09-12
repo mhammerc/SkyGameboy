@@ -128,6 +128,94 @@ uint16 CPU::d8adc()
     return 8;
 }
 
+uint16 CPU::r8sub(uint8 reg)
+{
+    F = 0;
+    F |= FFlags.N;
+
+    // carry
+    if (reg >= A)
+    {
+        F |= FFlags.C;
+    }
+
+    // half-carry
+    if (((A ^ reg ^ (A - reg)) ^ 0x10) != 0)
+    {
+        F |= FFlags.H;
+    }
+
+    A -= reg;
+    if (A == 0)
+    {
+        F |= FFlags.Z;
+    }
+
+    return 4;
+}
+
+uint16 CPU::m8sub(uint16 addr)
+{
+    const uint8 value = fetch8(addr + 0xFF00);
+    r8sub(value);
+    return 8;
+}
+
+uint16 CPU::d8sub()
+{
+    const uint8 value = fetch8(PC);
+    ++PC;
+    r8sub(value);
+    return 8;
+}
+
+uint16 CPU::r8sbc(uint8 reg)
+{
+    bool carry = (F & FFlags.C) != 0;
+    F = 0;
+    F |= FFlags.N;
+
+    if (carry)
+    {
+        ++reg;
+    }
+
+    // carry
+    if (reg >= A || (carry && reg == 0))
+    {
+        F |= FFlags.C;
+    }
+
+    // half-carry
+    if (((A ^ reg ^ (A + reg)) ^ 0x10) != 0)
+    {
+        F |= FFlags.H;
+    }
+
+    A -= reg;
+
+    if (A == 0)
+    {
+        F |= FFlags.Z;
+    }
+    return 4;
+}
+
+uint16 CPU::m8sbc(uint16 addr)
+{
+    const uint8 value = fetch8(addr + 0xFF00);
+    r8sbc(value);
+    return 8;
+}
+
+uint16 CPU::d8sbc()
+{
+    const uint8 value = fetch8(PC);
+    ++PC;
+    r8sbc(value);
+    return 8;
+}
+
 uint16 CPU::r8and(uint8 reg)
 {
     A = A & reg;
