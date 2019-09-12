@@ -46,12 +46,27 @@ private:
      */
     [[nodiscard]] uint16 fetch16(uint16 addr) const;
 
-    // registers
-    // All register are undefined values excepted PC which is initialized to 0 at start
-    uint8 A = 0, F = 0;
-    uint8 B = 0, C = 0;
-    uint8 D = 0, E = 0;
-    uint8 H = 0, L = 0;
+    // Registers can be 16bit read/write or 8bit read/write.
+    // To make that easy:
+    // - `AF` is the full 16bit value
+    // - `A` is a uint8 reference on the second byte of `AF` (little-endian)
+    // - `F` is a uint8 reference on the first byte of `AF`
+    uint16 AF = 0;
+    uint8 &A = reinterpret_cast<uint8&>(*(reinterpret_cast<uint8*>(&AF) + 1));
+    uint8 &F = reinterpret_cast<uint8&>(*(reinterpret_cast<uint8*>(&AF) + 0));
+
+    uint16 BC = 0;
+    uint8 &B = reinterpret_cast<uint8&>(*(reinterpret_cast<uint8*>(&BC) + 1));
+    uint8 &C = reinterpret_cast<uint8&>(*(reinterpret_cast<uint8*>(&BC) + 0));
+
+    uint16 DE = 0;
+    uint8 &D = reinterpret_cast<uint8&>(*(reinterpret_cast<uint8*>(&DE) + 1));
+    uint8 &E = reinterpret_cast<uint8&>(*(reinterpret_cast<uint8*>(&DE) + 0));
+
+    uint16 HL = 0;
+    uint8 &H = reinterpret_cast<uint8&>(*(reinterpret_cast<uint8*>(&HL) + 1));
+    uint8 &L = reinterpret_cast<uint8&>(*(reinterpret_cast<uint8*>(&HL) + 0));
+
     uint16 SP = 0;
     uint16 PC = 0;
 
@@ -61,7 +76,7 @@ private:
         const uint8 N = 1u << 6u;
         const uint8 H = 1u << 5u;
         const uint8 C = 1u << 4u;
-    } Flags;
+    } FFlags;
 
     std::unique_ptr<VirtualMemory> memory;
 
@@ -74,8 +89,16 @@ private:
     // - d16 means we apply operation from a 16 bit immediate value (read from PC)
     // - m8 means we apply operation from a 8 bit memory value referenced from 16 bit pointer
 
+    uint16 nop();
+
     uint16 d16Load(uint16 &reg);
     uint16 d16Load(uint8 &reg1, uint8 &reg2);
+
+    uint16 r8add(uint8 reg);
+    uint16 m8add(uint16 addr);
+    uint16 d8add();
+    uint16 r16add(uint16 reg);
+    uint16 d16add();
 
     uint16 r8and(uint8 reg);
     uint16 m8and(uint16 addr);
