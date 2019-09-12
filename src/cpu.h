@@ -53,6 +53,13 @@ private:
      */
     void write8(uint16 addr, uint8 value);
 
+    /**
+     * Write a word to memory
+     * @param addr Address of the word to write
+     * @param value Value to write
+     */
+    void write16(uint16 addr, uint16 value);
+
     // Registers can be 16bit read/write or 8bit read/write.
     // To make that easy:
     // - `AF` is the full 16bit value
@@ -100,6 +107,9 @@ private:
 
     uint16 d16Load(uint16 &reg);
     uint16 d16Load(uint8 &reg1, uint8 &reg2);
+
+    uint16 push(uint16 reg);
+    uint16 pop(uint16 &reg);
 
     uint16 r8add(uint8 reg);
     uint16 m8add(uint16 addr);

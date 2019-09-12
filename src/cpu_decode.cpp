@@ -11,6 +11,16 @@ uint16 CPU::decodeThenExecute(const uint8 opcode)
         case 0x21: return d16Load(HL);
         case 0x31: return d16Load(SP);
 
+        case 0xC5: return push(BC);
+        case 0xD5: return push(DE);
+        case 0xE5: return push(HL);
+        case 0xF5: return push(AF);
+
+        case 0xC1: return pop(BC);
+        case 0xD1: return pop(DE);
+        case 0xE1: return pop(HL);
+        case 0xF1: return pop(AF);
+
         case 0x80: return r8add(B);
         case 0x81: return r8add(C);
         case 0x82: return r8add(D);

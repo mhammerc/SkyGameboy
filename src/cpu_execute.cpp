@@ -13,6 +13,20 @@ uint16 CPU::d16Load(uint16 &reg)
     return 12;
 }
 
+uint16 CPU::push(uint16 reg)
+{
+    write16(SP, reg);
+    SP -= 2;
+    return 16;
+}
+
+uint16 CPU::pop(uint16 &reg)
+{
+    SP += 2;
+    reg = fetch16(SP);
+    return 12;
+}
+
 uint16 CPU::r8add(uint8 reg)
 {
     F = 0;

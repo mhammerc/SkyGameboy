@@ -26,3 +26,9 @@ void CPU::write8(uint16 addr, uint8 value)
 {
     memory->write8(addr, value);
 }
+
+void CPU::write16(uint16 addr, uint16 value)
+{
+    memory->write8(addr, value & 0xFF);
+    memory->write8(addr + 1, (value >> 8) & 0xFF);
+}
