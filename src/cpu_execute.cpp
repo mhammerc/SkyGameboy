@@ -73,12 +73,26 @@ uint16 CPU::r16add(uint16 reg)
     return 8;
 }
 
-uint16 CPU::d16add()
+uint16 CPU::d8addSP()
 {
-    const uint16 value = fetch16(PC);
-    PC += 2;
+    const uint8 reg = fetch8(PC);
+    PC += 1;
     F = 0;
-    r16add(value);
+
+    // carry
+    if (SP + reg < SP)
+    {
+        F |= FFlags.C;
+    }
+
+    // half-carry
+    if (((SP ^ reg ^ (SP + reg)) ^ 0x1000) != 0)
+    {
+        F |= FFlags.H;
+    }
+
+    SP += reg;
+
     return 16;
 }
 

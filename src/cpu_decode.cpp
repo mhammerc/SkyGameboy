@@ -24,7 +24,7 @@ uint16 CPU::decodeThenExecute(const uint8 opcode)
         case 0x19: return r16add(DE);
         case 0x29: return r16add(HL);
         case 0x39: return r16add(SP);
-        case 0xE8: return d16add();
+        case 0xE8: return d8addSP();
 
         case 0x88: return r8adc(B);
         case 0x89: return r8adc(C);
