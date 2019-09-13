@@ -94,77 +94,81 @@ private:
 
     std::unique_ptr<VirtualMemory> memory;
 
-    // todo: revoir tout les noms pour être consistants, clair et concis
-    // Here live all processor operations.
-    // They all return cycle count consumed
-    // Some naming convention si really helpful:
-    // - r8 means we apply operation from an 8bit register
-    // - r16 means we apply operation from a 16bit register
-    // - d8 means we apply operation from a 8bit immediate value (read from PC)
-    // - d16 means we apply operation from a 16 bit immediate value (read from PC)
-    // - m8 means we apply operation from a 8 bit memory value referenced from 16 bit pointer
+    // Here live all processor instructions.
+    // They all return cycle count consumed.
+    // Some naming convention:
+    // - R8: 8bit register
+    // - R16: 16bit register
+    // - D8: 8bit immediate value read from PC
+    // - D16: 16 bit immediate value read from PC
+    //
+    // - M8: 8 bit memory (specified by uint16 addr)
+    // Suffix `addr8` mean 8 bit address is read from PC (instead addr read from register)
+    // Suffix `addr16` mean 16 bit address is read from PC (instead addr read from register)
+    //
+    // When an address is 8bit, add 0xFF00 to that address.
 
     uint16 nop();
 
-    uint16 d8load(uint8 &reg);
-    uint16 d8loadTom8(uint16 addr);
-    uint16 r8load(uint8 &dest, uint8 src);
-    uint16 m8loadTor8(uint8 &dest, uint8 addr);
-    uint16 r8loadTom8(uint8 addr, uint8 src);
-    uint16 r8loadTom8Fromd16(uint8 src);
-    uint16 m8loadTor8Fromd16(uint8 &dest);
-    uint16 r8loadTom8Fromd8(uint8 src);
-    uint16 m8loadTor8Fromd8(uint8 &dest);
+    uint16 loadD8ToR8(uint8 &reg);
+    uint16 loadD8ToM8(uint16 addr);
+    uint16 loadR8ToR8(uint8 &dest, uint8 src);
+    uint16 loadM8ToR8(uint8 &dest, uint8 addr);
+    uint16 loadR8ToM8(uint8 addr, uint8 src);
+    uint16 loadR8ToM8Addr16(uint8 src);
+    uint16 loadM8Addr16ToR8(uint8 &dest);
+    uint16 loadR8ToM8Addr8(uint8 src);
+    uint16 loadM8Addr8ToR8(uint8 &dest);
 
-    uint16 r16load(uint16 &dest, uint16 src);
-    uint16 d16Load(uint16 &reg);
-    uint16 r16LoadTom16Fromd16(uint16 src);
-    uint16 loadLDHL();
+    uint16 loadR16ToR16(uint16 &dest, uint16 src);
+    uint16 loadD16ToR16(uint16 &reg);
+    uint16 loadR16ToM16Addr16(uint16 src);
+    uint16 LDHL();
 
     uint16 push(uint16 reg);
     uint16 pop(uint16 &reg);
 
-    uint16 r8add(uint8 reg);
-    uint16 m8add(uint16 addr);
-    uint16 d8add();
-    uint16 r16add(uint16 reg);
-    uint16 d8addSP();
+    uint16 addR8ToA(uint8 reg);
+    uint16 addM8ToA(uint16 addr);
+    uint16 addD8ToA();
+    uint16 addR16ToHL(uint16 reg);
+    uint16 addD8ToSP();
 
-    uint16 r8adc(uint8 reg);
-    uint16 m8adc(uint16 addr);
-    uint16 d8adc();
+    uint16 adcR8ToA(uint8 reg);
+    uint16 adcM8ToA(uint16 addr);
+    uint16 adcD8ToA();
 
-    uint16 r8sub(uint8 reg);
-    uint16 m8sub(uint16 addr);
-    uint16 d8sub();
+    uint16 subR8ToA(uint8 reg);
+    uint16 subM8ToA(uint16 addr);
+    uint16 subD8ToA();
 
-    uint16 r8sbc(uint8 reg);
-    uint16 m8sbc(uint16 addr);
-    uint16 d8sbc();
+    uint16 sbcR8ToA(uint8 reg);
+    uint16 sbcM8ToA(uint16 addr);
+    uint16 sbcD8ToA();
 
-    uint16 r8and(uint8 reg);
-    uint16 m8and(uint16 addr);
-    uint16 d8and();
+    uint16 andR8ToA(uint8 reg);
+    uint16 andM8ToA(uint16 addr);
+    uint16 andD8ToA();
 
-    uint16 r8or(uint8 reg);
-    uint16 m8or(uint16 addr);
-    uint16 d8or();
+    uint16 orR8ToA(uint8 reg);
+    uint16 orM8ToA(uint16 addr);
+    uint16 orD8ToA();
 
-    uint16 r8xor(uint8 reg);
-    uint16 m8xor(uint16 addr);
-    uint16 d8xor();
+    uint16 xorR8ToA(uint8 reg);
+    uint16 xorM8ToA(uint16 addr);
+    uint16 xorD8ToA();
 
-    uint16 r8cp(uint8 reg);
-    uint16 m8cp(uint16 addr);
-    uint16 d8cp();
+    uint16 cpR8ToA(uint8 reg);
+    uint16 cpM8ToA(uint16 addr);
+    uint16 cpD8ToA();
 
-    uint16 r8inc(uint8 &reg);
-    uint16 m8inc(uint16 addr);
-    uint16 r16inc(uint16 &reg);
+    uint16 incR8(uint8 &reg);
+    uint16 incM8(uint16 addr);
+    uint16 incR16(uint16 &reg);
 
-    uint16 r8dec(uint8 &reg);
-    uint16 m8dec(uint16 addr);
-    uint16 r16dec(uint16 &reg);
+    uint16 decR8(uint8 &reg);
+    uint16 decM8(uint16 addr);
+    uint16 decR16(uint16 &reg);
 };
 
 

@@ -6,7 +6,7 @@ uint16 CPU::nop()
     return 4;
 }
 
-uint16 CPU::d8load(uint8 &reg)
+uint16 CPU::loadD8ToR8(uint8 &reg)
 {
     const uint8 value = fetch8(PC);
     ++PC;
@@ -14,7 +14,7 @@ uint16 CPU::d8load(uint8 &reg)
     return 8;
 }
 
-uint16 CPU::d8loadTom8(uint16 addr)
+uint16 CPU::loadD8ToM8(uint16 addr)
 {
     const uint8 value = fetch8(PC);
     ++PC;
@@ -22,26 +22,26 @@ uint16 CPU::d8loadTom8(uint16 addr)
     return 12;
 }
 
-uint16 CPU::r8load(uint8 &dest, uint8 src)
+uint16 CPU::loadR8ToR8(uint8 &dest, uint8 src)
 {
     dest = src;
     return 4;
 }
 
-uint16 CPU::m8loadTor8(uint8 &dest, uint8 addr)
+uint16 CPU::loadM8ToR8(uint8 &dest, uint8 addr)
 {
     const uint8 value = fetch8(addr + 0xFF00);
     dest = value;
     return 8;
 }
 
-uint16 CPU::r8loadTom8(uint8 addr, uint8 src)
+uint16 CPU::loadR8ToM8(uint8 addr, uint8 src)
 {
     write8(addr + 0xFF00, src);
     return 8;
 }
 
-uint16 CPU::r8loadTom8Fromd16(uint8 src)
+uint16 CPU::loadR8ToM8Addr16(uint8 src)
 {
     const uint16 addr = fetch16(PC);
     PC += 2;
@@ -49,7 +49,7 @@ uint16 CPU::r8loadTom8Fromd16(uint8 src)
     return 16;
 }
 
-uint16 CPU::m8loadTor8Fromd16(uint8 &dest)
+uint16 CPU::loadM8Addr16ToR8(uint8 &dest)
 {
     const uint16 addr = fetch16(PC);
     PC += 2;
@@ -57,7 +57,7 @@ uint16 CPU::m8loadTor8Fromd16(uint8 &dest)
     return 16;
 }
 
-uint16 CPU::r8loadTom8Fromd8(uint8 src)
+uint16 CPU::loadR8ToM8Addr8(uint8 src)
 {
     const uint16 addr = fetch8(PC) + 0xFF00;
     PC += 1;
@@ -65,7 +65,7 @@ uint16 CPU::r8loadTom8Fromd8(uint8 src)
     return 12;
 }
 
-uint16 CPU::m8loadTor8Fromd8(uint8 &dest)
+uint16 CPU::loadM8Addr8ToR8(uint8 &dest)
 {
     const uint16 addr = fetch8(PC) + 0xFF00;
     PC += 1;
@@ -73,20 +73,20 @@ uint16 CPU::m8loadTor8Fromd8(uint8 &dest)
     return 12;
 }
 
-uint16 CPU::r16load(uint16 &dest, uint16 src)
+uint16 CPU::loadR16ToR16(uint16 &dest, uint16 src)
 {
     dest = src;
     return 8;
 }
 
-uint16 CPU::d16Load(uint16 &reg)
+uint16 CPU::loadD16ToR16(uint16 &reg)
 {
     reg = fetch16(PC);
     PC += 2;
     return 12;
 }
 
-uint16 CPU::r16LoadTom16Fromd16(uint16 src)
+uint16 CPU::loadR16ToM16Addr16(uint16 src)
 {
     const uint16 addr = fetch16(PC);
     PC += 2;
@@ -94,7 +94,7 @@ uint16 CPU::r16LoadTom16Fromd16(uint16 src)
     return 20;
 }
 
-uint16 CPU::loadLDHL()
+uint16 CPU::LDHL()
 {
     const uint8 value = fetch8(PC);
     ++PC;
@@ -129,7 +129,7 @@ uint16 CPU::pop(uint16 &reg)
     return 12;
 }
 
-uint16 CPU::r8add(uint8 reg)
+uint16 CPU::addR8ToA(uint8 reg)
 {
     F = 0;
     // carry
@@ -153,22 +153,22 @@ uint16 CPU::r8add(uint8 reg)
     return 4;
 }
 
-uint16 CPU::m8add(uint16 addr)
+uint16 CPU::addM8ToA(uint16 addr)
 {
     const uint8 value = fetch8(addr);
-    r8add(value);
+    addR8ToA(value);
     return 8;
 }
 
-uint16 CPU::d8add()
+uint16 CPU::addD8ToA()
 {
     const uint8 value = fetch8(PC);
     ++PC;
-    r8add(value);
+    addR8ToA(value);
     return 8;
 }
 
-uint16 CPU::r16add(uint16 reg)
+uint16 CPU::addR16ToHL(uint16 reg)
 {
     F &= ~FFlags.N;
     F &= ~FFlags.H;
@@ -189,7 +189,7 @@ uint16 CPU::r16add(uint16 reg)
     return 8;
 }
 
-uint16 CPU::d8addSP()
+uint16 CPU::addD8ToSP()
 {
     const uint8 reg = fetch8(PC);
     PC += 1;
@@ -212,7 +212,7 @@ uint16 CPU::d8addSP()
     return 16;
 }
 
-uint16 CPU::r8adc(uint8 reg)
+uint16 CPU::adcR8ToA(uint8 reg)
 {
     bool carry = (F & FFlags.C) != 0;
     F = 0;
@@ -243,22 +243,22 @@ uint16 CPU::r8adc(uint8 reg)
     return 4;
 }
 
-uint16 CPU::m8adc(uint16 addr)
+uint16 CPU::adcM8ToA(uint16 addr)
 {
     const uint8 value = fetch8(addr);
-    r8adc(value);
+    adcR8ToA(value);
     return 8;
 }
 
-uint16 CPU::d8adc()
+uint16 CPU::adcD8ToA()
 {
     const uint8 value = fetch8(PC);
     ++PC;
-    r8adc(value);
+    adcR8ToA(value);
     return 8;
 }
 
-uint16 CPU::r8sub(uint8 reg)
+uint16 CPU::subR8ToA(uint8 reg)
 {
     F = 0;
     F |= FFlags.N;
@@ -284,22 +284,22 @@ uint16 CPU::r8sub(uint8 reg)
     return 4;
 }
 
-uint16 CPU::m8sub(uint16 addr)
+uint16 CPU::subM8ToA(uint16 addr)
 {
     const uint8 value = fetch8(addr);
-    r8sub(value);
+    subR8ToA(value);
     return 8;
 }
 
-uint16 CPU::d8sub()
+uint16 CPU::subD8ToA()
 {
     const uint8 value = fetch8(PC);
     ++PC;
-    r8sub(value);
+    subR8ToA(value);
     return 8;
 }
 
-uint16 CPU::r8sbc(uint8 reg)
+uint16 CPU::sbcR8ToA(uint8 reg)
 {
     bool carry = (F & FFlags.C) != 0;
     F = 0;
@@ -331,22 +331,22 @@ uint16 CPU::r8sbc(uint8 reg)
     return 4;
 }
 
-uint16 CPU::m8sbc(uint16 addr)
+uint16 CPU::sbcM8ToA(uint16 addr)
 {
     const uint8 value = fetch8(addr);
-    r8sbc(value);
+    sbcR8ToA(value);
     return 8;
 }
 
-uint16 CPU::d8sbc()
+uint16 CPU::sbcD8ToA()
 {
     const uint8 value = fetch8(PC);
     ++PC;
-    r8sbc(value);
+    sbcR8ToA(value);
     return 8;
 }
 
-uint16 CPU::r8and(uint8 reg)
+uint16 CPU::andR8ToA(uint8 reg)
 {
     A = A & reg;
 
@@ -359,22 +359,22 @@ uint16 CPU::r8and(uint8 reg)
     return 4;
 }
 
-uint16 CPU::m8and(uint16 addr)
+uint16 CPU::andM8ToA(uint16 addr)
 {
     const uint8 value = fetch8(addr);
-    r8and(value);
+    andR8ToA(value);
     return 8;
 }
 
-uint16 CPU::d8and()
+uint16 CPU::andD8ToA()
 {
     const uint8 value = fetch8(PC);
     ++PC;
-    r8and(value);
+    andR8ToA(value);
     return 8;
 }
 
-uint16 CPU::r8or(uint8 reg)
+uint16 CPU::orR8ToA(uint8 reg)
 {
     A = A | reg;
 
@@ -386,22 +386,22 @@ uint16 CPU::r8or(uint8 reg)
     return 4;
 }
 
-uint16 CPU::m8or(uint16 addr)
+uint16 CPU::orM8ToA(uint16 addr)
 {
     const uint8 value = fetch8(addr);
-    r8or(value);
+    orR8ToA(value);
     return 8;
 }
 
-uint16 CPU::d8or()
+uint16 CPU::orD8ToA()
 {
     const uint8 value = fetch8(PC);
     ++PC;
-    r8or(value);
+    orR8ToA(value);
     return 8;
 }
 
-uint16 CPU::r8xor(uint8 reg)
+uint16 CPU::xorR8ToA(uint8 reg)
 {
     A = A ^ reg;
 
@@ -413,22 +413,22 @@ uint16 CPU::r8xor(uint8 reg)
     return 4;
 }
 
-uint16 CPU::m8xor(uint16 addr)
+uint16 CPU::xorM8ToA(uint16 addr)
 {
     const uint8 value = fetch8(addr);
-    r8xor(value);
+    xorR8ToA(value);
     return 8;
 }
 
-uint16 CPU::d8xor()
+uint16 CPU::xorD8ToA()
 {
     const uint8 value = fetch8(PC);
     ++PC;
-    r8xor(value);
+    xorR8ToA(value);
     return 8;
 }
 
-uint16 CPU::r8cp(uint8 reg)
+uint16 CPU::cpR8ToA(uint8 reg)
 {
     F = 0;
     F |= FFlags.N;
@@ -453,22 +453,22 @@ uint16 CPU::r8cp(uint8 reg)
     return 4;
 }
 
-uint16 CPU::m8cp(uint16 addr)
+uint16 CPU::cpM8ToA(uint16 addr)
 {
     const uint8 value = fetch8(addr);
-    r8cp(value);
+    cpR8ToA(value);
     return 8;
 }
 
-uint16 CPU::d8cp()
+uint16 CPU::cpD8ToA()
 {
     const uint8 value = fetch8(PC);
     ++PC;
-    r8cp(value);
+    cpR8ToA(value);
     return 8;
 }
 
-uint16 CPU::r8inc(uint8 &reg)
+uint16 CPU::incR8(uint8 &reg)
 {
     F &= ~FFlags.N;
 
@@ -487,21 +487,21 @@ uint16 CPU::r8inc(uint8 &reg)
     return 4;
 }
 
-uint16 CPU::m8inc(uint16 addr)
+uint16 CPU::incM8(uint16 addr)
 {
     uint8 value = fetch8(addr);
-    r8inc(value);
+    incR8(value);
     write8(addr, value);
     return 12;
 }
 
-uint16 CPU::r16inc(uint16 &reg)
+uint16 CPU::incR16(uint16 &reg)
 {
     ++reg;
     return 8;
 }
 
-uint16 CPU::r8dec(uint8 &reg)
+uint16 CPU::decR8(uint8 &reg)
 {
     F |= FFlags.N;
 
@@ -520,15 +520,15 @@ uint16 CPU::r8dec(uint8 &reg)
     return 4;
 }
 
-uint16 CPU::m8dec(uint16 addr)
+uint16 CPU::decM8(uint16 addr)
 {
     uint8 value = fetch8(addr);
-    r8dec(value);
+    decR8(value);
     write8(addr, value);
     return 12;
 }
 
-uint16 CPU::r16dec(uint16 &reg)
+uint16 CPU::decR16(uint16 &reg)
 {
     --reg;
     return 8;
