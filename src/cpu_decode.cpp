@@ -17,6 +17,9 @@ uint16 CPU::decodeThenExecute(const uint8 opcode)
         case 0xF1: return pop(AF);
 
         case 0x27: return DAA();
+        case 0x2F: return CPL();
+        case 0x37: return SCF();
+        case 0x3F: return CCF();
 
         case 0x06: return loadD8ToR8(B);
         case 0x0E: return loadD8ToR8(C);

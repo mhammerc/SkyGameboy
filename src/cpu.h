@@ -112,6 +112,9 @@ private:
     uint16 push(uint16 reg);
     uint16 pop(uint16 &reg);
     uint16 DAA();
+    uint16 CPL();
+    uint16 SCF();
+    uint16 CCF();
 
     uint16 loadD8ToR8(uint8 &reg);
     uint16 loadD8ToM8(uint16 addr);

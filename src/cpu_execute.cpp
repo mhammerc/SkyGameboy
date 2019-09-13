@@ -54,6 +54,31 @@ uint16 CPU::DAA()
     return 4;
 }
 
+uint16 CPU::CPL()
+{
+    F |= FFlags.N;
+    F |= FFlags.H;
+    A = ~A;
+
+    return 4;
+}
+
+uint16 CPU::SCF()
+{
+    F &= ~FFlags.N;
+    F &= ~FFlags.H;
+    F ^= FFlags.C;
+    return 4;
+}
+
+uint16 CPU::CCF()
+{
+    F &= ~FFlags.N;
+    F &= ~FFlags.H;
+    F |= FFlags.C;
+    return 4;
+}
+
 uint16 CPU::loadD8ToR8(uint8 &reg)
 {
     const uint8 value = fetch8(PC);
