@@ -94,6 +94,7 @@ private:
 
     std::unique_ptr<VirtualMemory> memory;
 
+    // todo: revoir tout les noms pour être consistants, clair et concis
     // Here live all processor operations.
     // They all return cycle count consumed
     // Some naming convention si really helpful:
@@ -105,8 +106,20 @@ private:
 
     uint16 nop();
 
+    uint16 d8load(uint8 &reg);
+    uint16 d8loadTom8(uint16 addr);
+    uint16 r8load(uint8 &dest, uint8 src);
+    uint16 m8loadTor8(uint8 &dest, uint8 addr);
+    uint16 r8loadTom8(uint8 addr, uint8 src);
+    uint16 r8loadTom8Fromd16(uint8 src);
+    uint16 m8loadTor8Fromd16(uint8 &dest);
+    uint16 r8loadTom8Fromd8(uint8 src);
+    uint16 m8loadTor8Fromd8(uint8 &dest);
+
+    uint16 r16load(uint16 &dest, uint16 src);
     uint16 d16Load(uint16 &reg);
-    uint16 d16Load(uint8 &reg1, uint8 &reg2);
+    uint16 r16LoadTom16Fromd16(uint16 src);
+    uint16 loadLDHL();
 
     uint16 push(uint16 reg);
     uint16 pop(uint16 &reg);

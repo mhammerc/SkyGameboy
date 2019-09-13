@@ -6,10 +6,110 @@ uint16 CPU::decodeThenExecute(const uint8 opcode)
     {
         case 0x00: return nop();
 
+        case 0x06: return d8load(B);
+        case 0x0E: return d8load(C);
+        case 0x16: return d8load(D);
+        case 0x1E: return d8load(E);
+        case 0x26: return d8load(H);
+        case 0x2E: return d8load(L);
+        case 0x36: return d8loadTom8(HL);
+        case 0x3E: return d8load(A);
+
+        case 0x40: return r8load(B, B);
+        case 0x41: return r8load(B, C);
+        case 0x42: return r8load(B, D);
+        case 0x43: return r8load(B, E);
+        case 0x44: return r8load(B, H);
+        case 0x45: return r8load(B, L);
+        case 0x46: return m8loadTor8(B, HL);
+        case 0x47: return r8load(B, A);
+
+        case 0x48: return r8load(C, B);
+        case 0x49: return r8load(C, C);
+        case 0x4A: return r8load(C, D);
+        case 0x4B: return r8load(C, E);
+        case 0x4C: return r8load(C, H);
+        case 0x4D: return r8load(C, L);
+        case 0x4E: return m8loadTor8(C, HL);
+        case 0x4F: return r8load(C, A);
+
+        case 0x50: return r8load(D, B);
+        case 0x51: return r8load(D, C);
+        case 0x52: return r8load(D, D);
+        case 0x53: return r8load(D, E);
+        case 0x54: return r8load(D, H);
+        case 0x55: return r8load(D, L);
+        case 0x56: return m8loadTor8(D, HL);
+        case 0x57: return r8load(D, A);
+
+        case 0x58: return r8load(E, B);
+        case 0x59: return r8load(E, C);
+        case 0x5A: return r8load(E, D);
+        case 0x5B: return r8load(E, E);
+        case 0x5C: return r8load(E, H);
+        case 0x5D: return r8load(E, L);
+        case 0x5E: return m8loadTor8(E, HL);
+        case 0x5F: return r8load(E, A);
+
+        case 0x60: return r8load(H, B);
+        case 0x61: return r8load(H, C);
+        case 0x62: return r8load(H, D);
+        case 0x63: return r8load(H, E);
+        case 0x64: return r8load(H, H);
+        case 0x65: return r8load(H, L);
+        case 0x66: return m8loadTor8(H, HL);
+        case 0x67: return r8load(H, A);
+
+        case 0x68: return r8load(L, B);
+        case 0x69: return r8load(L, C);
+        case 0x6A: return r8load(L, D);
+        case 0x6B: return r8load(L, E);
+        case 0x6C: return r8load(L, H);
+        case 0x6D: return r8load(L, L);
+        case 0x6E: return m8loadTor8(L, HL);
+        case 0x6F: return r8load(L, A);
+
+        case 0x70: return r8loadTom8(HL, B);
+        case 0x71: return r8loadTom8(HL, C);
+        case 0x72: return r8loadTom8(HL, D);
+        case 0x73: return r8loadTom8(HL, E);
+        case 0x74: return r8loadTom8(HL, H);
+        case 0x75: return r8loadTom8(HL, L);
+        case 0x77: return r8loadTom8(HL, A);
+
+        case 0x78: return r8load(A, B);
+        case 0x79: return r8load(A, C);
+        case 0x7A: return r8load(A, D);
+        case 0x7B: return r8load(A, E);
+        case 0x7C: return r8load(A, H);
+        case 0x7D: return r8load(A, L);
+        case 0x7E: return m8loadTor8(A, HL);
+        case 0x7F: return r8load(A, A);
+
+        case 0x02: return r8loadTom8(BC, A);
+        case 0x12: return r8loadTom8(DE, A);
+        case 0x22: return r8loadTom8(HL++, A);
+        case 0x32: return r8loadTom8(HL--, A);
+
+        case 0x0A: return m8loadTor8(A, BC);
+        case 0x1A: return m8loadTor8(A, DE);
+        case 0x2A: return m8loadTor8(A, HL++);
+        case 0x3A: return m8loadTor8(A, HL--);
+
         case 0x01: return d16Load(BC);
         case 0x11: return d16Load(DE);
         case 0x21: return d16Load(HL);
         case 0x31: return d16Load(SP);
+        case 0x08: return r16LoadTom16Fromd16(SP);
+
+        case 0xF9: return r16load(SP, HL);
+        case 0xF8: return loadLDHL();
+        case 0xEA: return r8loadTom8Fromd16(A);
+        case 0xFA: return m8loadTor8Fromd16(A);
+        case 0xE2: return r8loadTom8(C, A);
+        case 0xF2: return m8loadTor8(A, C);
+        case 0xE0: return r8loadTom8Fromd8(A);
+        case 0xF0: return m8loadTor8Fromd8(A);
 
         case 0xC5: return push(BC);
         case 0xD5: return push(DE);
