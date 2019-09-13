@@ -109,6 +109,9 @@ private:
     // When an address is 8bit, add 0xFF00 to that address.
 
     uint16 nop();
+    uint16 push(uint16 reg);
+    uint16 pop(uint16 &reg);
+    uint16 DAA();
 
     uint16 loadD8ToR8(uint8 &reg);
     uint16 loadD8ToM8(uint16 addr);
@@ -124,9 +127,6 @@ private:
     uint16 loadD16ToR16(uint16 &reg);
     uint16 loadR16ToM16Addr16(uint16 src);
     uint16 LDHL();
-
-    uint16 push(uint16 reg);
-    uint16 pop(uint16 &reg);
 
     uint16 addR8ToA(uint8 reg);
     uint16 addM8ToA(uint16 addr);

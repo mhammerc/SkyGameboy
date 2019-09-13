@@ -6,6 +6,54 @@ uint16 CPU::nop()
     return 4;
 }
 
+uint16 CPU::push(uint16 reg)
+{
+    write16(SP, reg);
+    SP -= 2;
+    return 16;
+}
+
+uint16 CPU::pop(uint16 &reg)
+{
+    SP += 2;
+    reg = fetch16(SP);
+    return 12;
+}
+
+uint16 CPU::DAA()
+{
+    // Shameless taken from https://ehaskins.com/2018-01-30%20Z80%20DAA/
+    // because yeah...
+    uint8 correction = 0;
+
+    const bool FH = F & FFlags.H;
+    const bool FN = F & FFlags.N;
+    const bool FC = F & FFlags.C;
+
+    uint8 setFC = false;
+    if (FH || (!FN && (A & 0xfu) > 9))
+    {
+        correction |= 0x6u;
+    }
+
+    if (FC || (!FN && A > 0x99u))
+    {
+        correction |= 0x60u;
+        setFC = FFlags.C;
+    }
+
+    A += FN ? -correction : correction;
+
+    A &= 0xffu;
+
+    const uint8 setFlagZ = A == 0 ? FFlags.Z : 0;
+
+    F &= ~(FFlags.H | FFlags.Z | FFlags.C);
+    F |= setFC | setFlagZ;
+
+    return 4;
+}
+
 uint16 CPU::loadD8ToR8(uint8 &reg)
 {
     const uint8 value = fetch8(PC);
@@ -112,20 +160,6 @@ uint16 CPU::LDHL()
     }
 
     HL = SP + value;
-    return 12;
-}
-
-uint16 CPU::push(uint16 reg)
-{
-    write16(SP, reg);
-    SP -= 2;
-    return 16;
-}
-
-uint16 CPU::pop(uint16 &reg)
-{
-    SP += 2;
-    reg = fetch16(SP);
     return 12;
 }
 

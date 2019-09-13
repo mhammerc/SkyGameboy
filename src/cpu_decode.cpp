@@ -6,6 +6,18 @@ uint16 CPU::decodeThenExecute(const uint8 opcode)
     {
         case 0x00: return nop();
 
+        case 0xC5: return push(BC);
+        case 0xD5: return push(DE);
+        case 0xE5: return push(HL);
+        case 0xF5: return push(AF);
+
+        case 0xC1: return pop(BC);
+        case 0xD1: return pop(DE);
+        case 0xE1: return pop(HL);
+        case 0xF1: return pop(AF);
+
+        case 0x27: return DAA();
+
         case 0x06: return loadD8ToR8(B);
         case 0x0E: return loadD8ToR8(C);
         case 0x16: return loadD8ToR8(D);
@@ -110,16 +122,6 @@ uint16 CPU::decodeThenExecute(const uint8 opcode)
         case 0xF2: return loadM8ToR8(A, C);
         case 0xE0: return loadR8ToM8Addr8(A);
         case 0xF0: return loadM8Addr8ToR8(A);
-
-        case 0xC5: return push(BC);
-        case 0xD5: return push(DE);
-        case 0xE5: return push(HL);
-        case 0xF5: return push(AF);
-
-        case 0xC1: return pop(BC);
-        case 0xD1: return pop(DE);
-        case 0xE1: return pop(HL);
-        case 0xF1: return pop(AF);
 
         case 0x80: return addR8ToA(B);
         case 0x81: return addR8ToA(C);
