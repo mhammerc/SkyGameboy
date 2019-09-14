@@ -25,6 +25,10 @@ public:
     uint16 nextTick();
 
 private:
+
+    bool interruptsEnabled = true;
+    void setInterruptsEnabled(bool enabled);
+
     /**
      * Decode then Execute the given opcode.
      * @param opcode opcode to execute

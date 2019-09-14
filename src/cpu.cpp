@@ -10,6 +10,11 @@ uint16 CPU::nextTick()
     return decodeThenExecute(opcode);
 }
 
+void CPU::setInterruptsEnabled(bool enabled)
+{
+    interruptsEnabled = enabled;
+}
+
 uint8 CPU::fetch8(const uint16 addr) const
 {
     return memory->read8(addr);
