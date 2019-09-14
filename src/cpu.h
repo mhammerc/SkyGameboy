@@ -159,6 +159,8 @@ private:
     uint16 retIf(uint8 flag, bool set);
     uint16 reti();
 
+    uint16 rst(uint8 addr);
+
     uint16 loadD8ToR8(uint8 &reg);
     uint16 loadD8ToM8(uint16 addr);
     uint16 loadR8ToR8(uint8 &dest, uint8 src);

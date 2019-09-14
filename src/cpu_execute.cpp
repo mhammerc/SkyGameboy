@@ -170,6 +170,12 @@ uint16 CPU::reti()
     return 16;
 }
 
+uint16 CPU::rst(uint8 addr)
+{
+    PC = static_cast<uint16>(addr);
+    return 16;
+}
+
 uint16 CPU::loadD8ToR8(uint8 &reg)
 {
     const uint8 value = fetch8(PC);

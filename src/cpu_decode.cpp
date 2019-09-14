@@ -35,6 +35,15 @@ uint16 CPU::decodeThenExecute(const uint8 opcode)
         case 0xD0: return retIf(F & FFlags.C, false);
         case 0xD8: return retIf(F & FFlags.C, true);
 
+        case 0xC7: return rst(0x00);
+        case 0xCF: return rst(0x08);
+        case 0xD7: return rst(0x10);
+        case 0xDF: return rst(0x18);
+        case 0xE7: return rst(0x20);
+        case 0xEF: return rst(0x28);
+        case 0xF7: return rst(0x30);
+        case 0xFF: return rst(0x38);
+
         case 0x27: return DAA();
         case 0x2F: return CPL();
         case 0x37: return SCF();
