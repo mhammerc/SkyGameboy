@@ -79,6 +79,50 @@ uint16 CPU::CCF()
     return 4;
 }
 
+uint16 CPU::JPD16()
+{
+    const uint16 addr = fetch16(PC);
+    PC = addr;
+    return 16;
+}
+
+uint16 CPU::JPHL()
+{
+    PC = HL;
+    return 4;
+}
+
+uint16 CPU::JpIfR16(uint8 flag, bool set)
+{
+    if (static_cast<bool>(flag) != set)
+    {
+        PC += 2;
+        return 12;
+    }
+    const uint16 addr = fetch16(PC);
+    PC = addr;
+    return 16;
+}
+
+uint16 CPU::JRD8()
+{
+    const uint8 displacement_unsigned = fetch8(PC);
+    PC += static_cast<int8>(displacement_unsigned) + 1;
+    return 12;
+}
+
+uint16 CPU::JrIfD8(uint8 flag, bool set)
+{
+    if (static_cast<bool>(flag) != set)
+    {
+        PC += 1;
+        return 8;
+    }
+    const uint8 displacement_unsigned = fetch8(PC);
+    PC += static_cast<int8>(displacement_unsigned) + 1;
+    return 12;
+}
+
 uint16 CPU::loadD8ToR8(uint8 &reg)
 {
     const uint8 value = fetch8(PC);
@@ -154,8 +198,9 @@ uint16 CPU::loadR16ToR16(uint16 &dest, uint16 src)
 
 uint16 CPU::loadD16ToR16(uint16 &reg)
 {
-    reg = fetch16(PC);
+    const uint16 value = fetch16(PC);
     PC += 2;
+    reg = value;
     return 12;
 }
 

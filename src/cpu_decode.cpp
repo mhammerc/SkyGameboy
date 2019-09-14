@@ -21,6 +21,19 @@ uint16 CPU::decodeThenExecute(const uint8 opcode)
         case 0x37: return SCF();
         case 0x3F: return CCF();
 
+        case 0xC3: return JPD16();
+        case 0xE9: return JPHL();
+        case 0xC2: return JpIfR16(F & FFlags.Z, false);
+        case 0xCA: return JpIfR16(F & FFlags.Z, true);
+        case 0xD2: return JpIfR16(F & FFlags.C, false);
+        case 0xDA: return JpIfR16(F & FFlags.C, true);
+
+        case 0x18: return JRD8();
+        case 0x20: return JrIfD8(F & FFlags.Z, false);
+        case 0x28: return JrIfD8(F & FFlags.Z, false);
+        case 0x30: return JrIfD8(F & FFlags.C, false);
+        case 0x38: return JrIfD8(F & FFlags.C, true);
+
         case 0x06: return loadD8ToR8(B);
         case 0x0E: return loadD8ToR8(C);
         case 0x16: return loadD8ToR8(D);

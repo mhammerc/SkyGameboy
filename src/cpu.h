@@ -116,6 +116,12 @@ private:
     uint16 SCF();
     uint16 CCF();
 
+    uint16 JPD16();
+    uint16 JPHL();
+    uint16 JpIfR16(uint8 flag, bool set);
+    uint16 JRD8();
+    uint16 JrIfD8(uint8 flag, bool set);
+
     uint16 loadD8ToR8(uint8 &reg);
     uint16 loadD8ToM8(uint16 addr);
     uint16 loadR8ToR8(uint8 &dest, uint8 src);
