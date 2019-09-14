@@ -9,7 +9,7 @@ uint8 VirtualMemory::read8(const uint16 address)
         {
             readingBios = false;
         }
-        return biosRom->data[address];
+        return biosRom.data[address];
     }
 
     std::cerr << "Invalid read8 at address 0x" << std::hex << +address << std::endl;
@@ -18,5 +18,7 @@ uint8 VirtualMemory::read8(const uint16 address)
 
 void VirtualMemory::write8(const uint16 address, const uint8 value)
 {
+    (void)address;
+    (void)value;
 
 }

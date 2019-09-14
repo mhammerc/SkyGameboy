@@ -18,12 +18,11 @@
 class VirtualMemory
 {
 public:
-    explicit VirtualMemory(std::unique_ptr<FileReader<256>> biosRom) : biosRom(std::move(biosRom))
+    explicit VirtualMemory(const std::string& biosRomPath): biosRom(biosRomPath)
     {}
 
     // No copy
     // Will be allowed later to allow snapshots
-    VirtualMemory(const VirtualMemory&) = delete;
     VirtualMemory& operator=(const VirtualMemory&) = delete;
 
     [[nodiscard]] uint8 read8(uint16 address);
@@ -31,7 +30,7 @@ public:
 
 private:
     bool readingBios = true;
-    std::unique_ptr<FileReader<256>> biosRom;
+    const FileReader<256> biosRom;
 };
 
 

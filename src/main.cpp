@@ -8,10 +8,8 @@
 // 0x0000h = PC -> boot loader
 int main()
 {
-    auto biosRom = std::make_unique<FileReader<256>>("roms/dmg_boot.bin");
-    auto virtualMemory = std::make_unique<VirtualMemory>(std::move(biosRom));
-
-    CPU cpu(std::move(virtualMemory));
+    VirtualMemory virtualMemory("roms/dmg_boot.bin");
+    CPU cpu(virtualMemory);
 
     while (true)
     {

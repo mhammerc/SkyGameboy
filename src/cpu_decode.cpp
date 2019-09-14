@@ -165,7 +165,7 @@ uint16 CPU::decodeThenExecute(const uint8 opcode)
         case 0xE2: return loadR8ToM8(C, A);
         case 0xF2: return loadM8ToR8(A, C);
         case 0xE0: return loadR8ToM8Addr8(A);
-        case 0xF0: return loadM8Addr8ToR8(A);
+        case 0xF0: return loadM8Addr8ToR8();
 
         case 0x80: return addR8ToA(B);
         case 0x81: return addR8ToA(C);

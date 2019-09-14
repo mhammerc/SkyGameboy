@@ -9,7 +9,7 @@
 class CPU
 {
 public:
-    explicit CPU(std::unique_ptr<VirtualMemory> memory) : memory(std::move(memory))
+    explicit CPU(VirtualMemory &memory) : memory(memory)
     {};
 
     // No copy
@@ -68,14 +68,14 @@ private:
      * @param addr Address of the byte to read
      * @return The byte read
      */
-    [[nodiscard]] uint8 fetch8(uint16 addr) const;
+    [[nodiscard]] uint8 fetch8(uint16 addr);
 
     /**
      * Fetch a word from memory
      * @param addr Address of the word to read
      * @return The word read
      */
-    [[nodiscard]] uint16 fetch16(uint16 addr) const;
+    [[nodiscard]] uint16 fetch16(uint16 addr);
 
     /**
      * Write a byte to memory
@@ -123,7 +123,7 @@ private:
         const uint8 C = 1u << 4u;
     } FFlags;
 
-    std::unique_ptr<VirtualMemory> memory;
+    VirtualMemory memory;
 
     // Here live all processor instructions.
     // They all return cycle count consumed.
@@ -169,7 +169,7 @@ private:
     uint16 loadR8ToM8Addr16(uint8 src);
     uint16 loadM8Addr16ToR8(uint8 &dest);
     uint16 loadR8ToM8Addr8(uint8 src);
-    uint16 loadM8Addr8ToR8(uint8 &dest);
+    uint16 loadM8Addr8ToR8();
 
     uint16 loadR16ToR16(uint16 &dest, uint16 src);
     uint16 loadD16ToR16(uint16 &reg);

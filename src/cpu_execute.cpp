@@ -148,7 +148,7 @@ uint16 CPU::callIfD16(uint8 flag, bool set)
 
 uint16 CPU::ret()
 {
-    const uint16 addr = pop(PC);
+    pop(PC);
     return 16;
 }
 
@@ -159,13 +159,13 @@ uint16 CPU::retIf(uint8 flag, bool set)
         return 8;
     }
 
-    const uint16 addr = pop(PC);
+    pop(PC);
     return 20;
 }
 
 uint16 CPU::reti()
 {
-    const uint16 addr = pop(PC);
+    pop(PC);
     setInterruptsEnabled(true);
     return 16;
 }
@@ -235,7 +235,7 @@ uint16 CPU::loadR8ToM8Addr8(uint8 src)
     return 12;
 }
 
-uint16 CPU::loadM8Addr8ToR8(uint8 &dest)
+uint16 CPU::loadM8Addr8ToR8()
 {
     const uint16 addr = fetch8(PC) + 0xFF00;
     PC += 1;

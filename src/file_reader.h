@@ -42,9 +42,6 @@ public:
         fileStream.read(reinterpret_cast<int8*>(mutable_data), size);
     }
 
-    // Copy would be a costly operation and may overflow stack.
-    // Therefore it is forbidden.
-    FileReader(const FileReader&) = delete;
     FileReader& operator=(const FileReader&) = delete;
 
 private:

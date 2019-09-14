@@ -10,3 +10,5 @@ include_directories(${CMAKE_SOURCE_DIR}/deps/SFML/include)
 
 add_executable(fractal src/main.cpp src/cpu.cpp src/cpu.h src/file_reader.h src/general.h src/virtual_memory.cpp src/virtual_memory.h src/cpu_decode.cpp src/cpu_execute.cpp)
 target_link_libraries(fractal sfml-system sfml-window sfml-graphics)
+
+target_compile_options(fractal PRIVATE -Wall -Wextra)
