@@ -153,6 +153,12 @@ private:
     uint16 JRD8();
     uint16 JrIfD8(uint8 flag, bool set);
 
+    uint16 callD16();
+    uint16 callIfD16(uint8 flag, bool set);
+    uint16 ret();
+    uint16 retIf(uint8 flag, bool set);
+    uint16 reti();
+
     uint16 loadD8ToR8(uint8 &reg);
     uint16 loadD8ToM8(uint16 addr);
     uint16 loadR8ToR8(uint8 &dest, uint8 src);

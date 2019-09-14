@@ -22,6 +22,19 @@ uint16 CPU::decodeThenExecute(const uint8 opcode)
         case 0xE1: return pop(HL);
         case 0xF1: return pop(AF);
 
+        case 0xCD: return callD16();
+        case 0xC4: return callIfD16(F & FFlags.Z, false);
+        case 0xCC: return callIfD16(F & FFlags.Z, true);
+        case 0xD4: return callIfD16(F & FFlags.C, false);
+        case 0xDC: return callIfD16(F & FFlags.C, true);
+
+        case 0xC9: return ret();
+        case 0xD9: return reti();
+        case 0xC0: return retIf(F & FFlags.Z, false);
+        case 0xC8: return retIf(F & FFlags.Z, true);
+        case 0xD0: return retIf(F & FFlags.C, false);
+        case 0xD8: return retIf(F & FFlags.C, true);
+
         case 0x27: return DAA();
         case 0x2F: return CPL();
         case 0x37: return SCF();

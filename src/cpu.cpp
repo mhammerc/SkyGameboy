@@ -6,7 +6,7 @@ uint16 CPU::nextTick()
     {
         return 0;
     }
-    
+
     // fetch
     uint8 opcode = fetch8(PC);
     ++PC;

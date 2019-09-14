@@ -123,6 +123,53 @@ uint16 CPU::JrIfD8(uint8 flag, bool set)
     return 12;
 }
 
+uint16 CPU::callD16()
+{
+    const uint16 addr = fetch16(PC);
+    PC += 2;
+    push(PC);
+    PC = addr;
+    return 24;
+}
+
+uint16 CPU::callIfD16(uint8 flag, bool set)
+{
+    if (static_cast<bool>(flag) != set)
+    {
+        PC += 2;
+        return 12;
+    }
+    const uint16 addr = fetch16(PC);
+    PC += 2;
+    push(PC);
+    PC = addr;
+    return 24;
+}
+
+uint16 CPU::ret()
+{
+    const uint16 addr = pop(PC);
+    return 16;
+}
+
+uint16 CPU::retIf(uint8 flag, bool set)
+{
+    if (static_cast<bool>(flag) != set)
+    {
+        return 8;
+    }
+
+    const uint16 addr = pop(PC);
+    return 20;
+}
+
+uint16 CPU::reti()
+{
+    const uint16 addr = pop(PC);
+    setInterruptsEnabled(true);
+    return 16;
+}
+
 uint16 CPU::loadD8ToR8(uint8 &reg)
 {
     const uint8 value = fetch8(PC);
