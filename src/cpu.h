@@ -26,8 +26,35 @@ public:
 
 private:
 
+    /**
+     * Are interrupts enabled?
+     */
     bool interruptsEnabled = true;
+    /**
+     * Enable or disable interrupts.
+     * @param enabled True to enable interrupts.
+     */
     void setInterruptsEnabled(bool enabled);
+
+    /**
+     * Is CPU working? (fetch, execute, decode)
+     */
+    bool powerOn = true;
+    /**
+     * Stop or start CPU.
+     * @param powerOn True to start CPU.
+     */
+    void setCPUPowerOn(bool powerOn);
+
+    /**
+     * Are graphics (display) on?
+     */
+    bool graphicsOn = true;
+    /**
+     * Start or stop graphics.
+     * @param graphicsOn True to start graphics.
+     */
+    void setGraphicsOn(bool graphicsOn);
 
     /**
      * Decode then Execute the given opcode.

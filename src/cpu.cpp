@@ -2,6 +2,11 @@
 
 uint16 CPU::nextTick()
 {
+    if (!powerOn)
+    {
+        return 0;
+    }
+    
     // fetch
     uint8 opcode = fetch8(PC);
     ++PC;
@@ -13,6 +18,16 @@ uint16 CPU::nextTick()
 void CPU::setInterruptsEnabled(bool enabled)
 {
     interruptsEnabled = enabled;
+}
+
+void CPU::setCPUPowerOn(bool powerOn)
+{
+    this->powerOn = powerOn;
+}
+
+void CPU::setGraphicsOn(bool graphicsOn)
+{
+    this->graphicsOn = graphicsOn;
 }
 
 uint8 CPU::fetch8(const uint16 addr) const

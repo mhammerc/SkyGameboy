@@ -9,6 +9,9 @@ uint16 CPU::decodeThenExecute(const uint8 opcode)
         case 0xF3: { setInterruptsEnabled(false); return 4; }
         case 0xFB: { setInterruptsEnabled(true); return 4; }
 
+        case 0x76: { setCPUPowerOn(false); return 4; }
+        case 0x10: { setCPUPowerOn(false); setGraphicsOn(false); ++PC; return 4; }
+
         case 0xC5: return push(BC);
         case 0xD5: return push(DE);
         case 0xE5: return push(HL);
