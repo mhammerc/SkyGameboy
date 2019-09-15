@@ -627,6 +627,8 @@ uint16 CPU::cpD8ToA()
 
 uint16 CPU::incR8(uint8 &reg)
 {
+    F &= ~FFlags.H;
+    F &= ~FFlags.Z;
     F &= ~FFlags.N;
 
     if (((reg ^ 1 ^ (reg + 1)) ^ 0x10) != 0)
@@ -660,9 +662,11 @@ uint16 CPU::incR16(uint16 &reg)
 
 uint16 CPU::decR8(uint8 &reg)
 {
+    F &= ~FFlags.H;
+    F &= ~FFlags.Z;
     F |= FFlags.N;
 
-    if (((reg ^ (-static_cast<uint8>(1)) ^ (reg - 1)) ^ 0x10) != 0)
+    if (((reg ^ (-static_cast<uint8>(1u)) ^ (reg - 1u)) ^ 0x10u) != 0)
     {
         F |= FFlags.H;
     }
@@ -689,4 +693,76 @@ uint16 CPU::decR16(uint16 &reg)
 {
     --reg;
     return 8;
+}
+
+uint16 CPU::rlca()
+{
+    F = 0;
+
+    if (A & (1u << 7u))
+    {
+        F |= FFlags.C;
+    }
+    rol(A);
+    return 4;
+}
+
+uint16 CPU::rrca()
+{
+    F = 0;
+
+    if (A & 1u)
+    {
+        F |= FFlags.C;
+    }
+    ror(A);
+    return 4;
+}
+
+uint16 CPU::rla()
+{
+    F = 0;
+
+    uint8 carryBit = A & (1u << 7u);
+    rol(A);
+
+    if (F & FFlags.C)
+    {
+        A |= 1u;
+    }
+    else
+    {
+        A &= ~1u;
+    }
+
+    if (carryBit)
+    {
+        F |= FFlags.C;
+    }
+
+    return 4;
+}
+
+uint16 CPU::rra()
+{
+    F = 0;
+
+    uint8 carryBit = A & 1u;
+    ror(A);
+
+    if (F & FFlags.C)
+    {
+        A |= (1u << 7u);
+    }
+    else
+    {
+        A &= ~(1u << 7u);
+    }
+
+    if (carryBit)
+    {
+        F |= FFlags.C;
+    }
+
+    return 4;
 }

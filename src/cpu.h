@@ -217,6 +217,12 @@ private:
     uint16 decR8(uint8 &reg);
     uint16 decM8(uint16 addr);
     uint16 decR16(uint16 &reg);
+
+    // All 8bit rotate, shift and bit instructions
+    uint16 rlca();
+    uint16 rrca();
+    uint16 rla();
+    uint16 rra();
 };
 
 

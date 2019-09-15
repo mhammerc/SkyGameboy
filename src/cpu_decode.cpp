@@ -12,6 +12,11 @@ uint16 CPU::decodeThenExecute(const uint8 opcode)
         case 0x76: { setCPUPowerOn(false); return 4; }
         case 0x10: { setCPUPowerOn(false); setGraphicsOn(false); ++PC; return 4; }
 
+        case 0x07: return rlca();
+        case 0x0F: return rrca();
+        case 0x17: return rla();
+        case 0x1F: return rra();
+
         case 0xC5: return push(BC);
         case 0xD5: return push(DE);
         case 0xE5: return push(HL);

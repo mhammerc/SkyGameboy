@@ -1,6 +1,8 @@
 #ifndef FRACTAL_GENERAL_H
 #define FRACTAL_GENERAL_H
 
+#include <climits>
+
 typedef unsigned char uint8;
 typedef char int8;
 
@@ -17,6 +19,20 @@ typedef short int16;
 [[maybe_unused]] static uint16 bytesToWordLE(const uint8 b1, const uint8 b2)
 {
     return static_cast<uint16>(b1) + (static_cast<uint16>(b2) << 8u);
+}
+
+template <typename Numeric>
+constexpr Numeric rol(Numeric val)
+{
+    static_assert(std::is_unsigned<Numeric>::value, "Rotate Left only makes sense for unsigned types");
+    return (val << 1) | (val >> (sizeof(Numeric) * CHAR_BIT - 1));
+}
+
+template <typename Numeric>
+constexpr Numeric ror(Numeric val)
+{
+    static_assert(std::is_unsigned<Numeric>::value, "Rotate Left only makes sense for unsigned types");
+    return (val >> 1) | (val << (sizeof(Numeric) * CHAR_BIT - 1));
 }
 
 #endif //FRACTAL_GENERAL_H
