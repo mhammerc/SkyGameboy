@@ -766,3 +766,76 @@ uint16 CPU::rra()
 
     return 4;
 }
+
+uint16 CPU::swapR8(uint8 &reg)
+{
+    F = 0;
+
+    if (reg == 0)
+    {
+        F |= FFlags.Z;
+    }
+    reg = (reg & 0xF0u >> 4u) | (reg & 0x0Fu << 4u);
+    return 8;
+}
+
+uint16 CPU::swapM8(uint16 addr)
+{
+    uint8 value = fetch8(addr);
+    swapR8(value);
+    write8(addr, value);
+    return 8;
+}
+
+uint16 CPU::bitR8(uint8 reg, uint8 bitIndex)
+{
+    F &= ~FFlags.N;
+    F |= FFlags.H;
+
+    if (reg & (1u << bitIndex))
+    {
+        F &= ~FFlags.Z;
+    }
+    else
+    {
+        F |= FFlags.Z;
+    }
+    return 8;
+}
+
+uint16 CPU::bitM8(uint16 addr, uint8 bitIndex)
+{
+    const uint8 value = fetch8(addr);
+    bitR8(value, bitIndex);
+    return 16;
+}
+
+uint16 CPU::setR8(uint8 &reg, uint8 bitIndex)
+{
+    (void)this;
+    reg |= 1u << bitIndex;
+    return 8;
+}
+
+uint16 CPU::setM8(uint16 addr, uint8 bitIndex)
+{
+    uint8 value = fetch8(addr);
+    setR8(value, bitIndex);
+    write8(addr, value);
+    return 16;
+}
+
+uint16 CPU::resR8(uint8 &reg, uint8 bitIndex)
+{
+    (void)this;
+    reg &= ~(1u << bitIndex);
+    return 8;
+}
+
+uint16 CPU::resM8(uint16 addr, uint8 bitIndex)
+{
+    uint8 value = fetch8(addr);
+    resR8(value, bitIndex);
+    write8(addr, value);
+    return 16;
+}

@@ -223,6 +223,18 @@ private:
     uint16 rrca();
     uint16 rla();
     uint16 rra();
+
+    uint16 prefixCB();
+
+    uint16 swapR8(uint8 &reg);
+    uint16 swapM8(uint16 addr);
+
+    uint16 bitR8(uint8 reg, uint8 bitIndex);
+    uint16 bitM8(uint16 addr, uint8 bitIndex);
+    uint16 setR8(uint8 &reg, uint8 bitIndex);
+    uint16 setM8(uint16 addr, uint8 bitIndex);
+    uint16 resR8(uint8 &reg, uint8 bitIndex);
+    uint16 resM8(uint16 addr, uint8 bitIndex);
 };
 
 
