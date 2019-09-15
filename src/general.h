@@ -9,6 +9,9 @@ typedef char int8;
 typedef unsigned short uint16;
 typedef short int16;
 
+typedef unsigned int uint32;
+typedef int int32;
+
 /**
  * Parse two independant bytes to a word (16bit value) using little endian.
  *

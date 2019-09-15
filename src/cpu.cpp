@@ -1,10 +1,10 @@
 #include "cpu.h"
 
-uint16 CPU::nextTick()
+void CPU::nextTick()
 {
     if (!powerOn)
     {
-        return 0;
+        return;
     }
 
     // fetch
@@ -12,7 +12,20 @@ uint16 CPU::nextTick()
     ++PC;
 
     // decode & execute
-    return decodeThenExecute(opcode);
+    const uint16 cycles = decodeThenExecute(opcode);
+    cycle_count += cycles;
+
+    if (cycle_count % 256 && cycle_count != 0)
+    {
+        memory.incrementDividerRegister();
+    }
+
+    const long double oneNanosecond = 1e+9;
+
+    // todo: too basic and ineficient. Do not take into account if we wait longer
+    // but it will work for now
+    const auto sleepFor = std::chrono::duration<long double, std::nano>(static_cast<long double>(cycles) / cycles_per_second * oneNanosecond);
+    std::this_thread::sleep_for(sleepFor);
 }
 
 void CPU::setInterruptsEnabled(bool enabled)

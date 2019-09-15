@@ -28,9 +28,19 @@ public:
     [[nodiscard]] uint8 read8(uint16 address);
     void write8(uint16 address, uint8 value);
 
+    void incrementDividerRegister();
+
 private:
     bool readingBios = true;
     const FileReader<256> biosRom;
+
+    uint8 workingRAM[0x2000];
+    uint8 oamRAM[0xA0];
+    uint8 stackRAM[128];
+
+    // I/O RAM
+    uint8 ioRAM[0x80];
+    const size_t dividerRegisterIndex = 0x04;
 };
 
 

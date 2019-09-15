@@ -8,15 +8,15 @@ uint16 CPU::nop()
 
 uint16 CPU::push(uint16 reg)
 {
-    write16(SP, reg);
     SP -= 2;
+    write16(SP, reg);
     return 16;
 }
 
 uint16 CPU::pop(uint16 &reg)
 {
-    SP += 2;
     reg = fetch16(SP);
+    SP += 2;
     return 12;
 }
 

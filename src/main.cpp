@@ -9,6 +9,7 @@
 int main()
 {
     VirtualMemory virtualMemory("roms/dmg_boot.bin");
+//    VirtualMemory virtualMemory("/Users/mhammerc/Downloads/cpu_instrs/cpu_instrs.gb");
     CPU cpu(virtualMemory);
 
     while (true)

@@ -2,6 +2,8 @@
 #define FRACTAL_CPU_H
 
 #include <memory>
+#include <thread>
+#include <chrono>
 
 #include "general.h"
 #include "virtual_memory.h"
@@ -20,11 +22,12 @@ public:
     /**
      * - Fetch, decode and execute instruction currently pointed by PC.
      * - Increment PC.
-     * @return Cycles consumed by instruction
      */
-    uint16 nextTick();
+    void nextTick();
 
 private:
+    const int32 cycles_per_second = 4194304;
+    int32 cycle_count = 0;
 
     /**
      * Are interrupts enabled?
