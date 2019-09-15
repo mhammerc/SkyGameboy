@@ -299,6 +299,60 @@ uint16 CPU::prefixCB()
 
     switch (opcode)
     {
+        case 0x00: return rlcR8(B);
+        case 0x01: return rlcR8(C);
+        case 0x02: return rlcR8(D);
+        case 0x03: return rlcR8(E);
+        case 0x04: return rlcR8(H);
+        case 0x05: return rlcR8(L);
+        case 0x06: return rlcM8(HL);
+        case 0x07: return rlcR8(A);
+
+        case 0x08: return rrcR8(B);
+        case 0x09: return rrcR8(C);
+        case 0x0A: return rrcR8(D);
+        case 0x0B: return rrcR8(E);
+        case 0x0C: return rrcR8(H);
+        case 0x0D: return rrcR8(L);
+        case 0x0E: return rrcM8(HL);
+        case 0x0F: return rrcR8(A);
+
+        case 0x10: return rlR8(B);
+        case 0x11: return rlR8(C);
+        case 0x12: return rlR8(D);
+        case 0x13: return rlR8(E);
+        case 0x14: return rlR8(H);
+        case 0x15: return rlR8(L);
+        case 0x16: return rlM8(HL);
+        case 0x17: return rlR8(A);
+
+        case 0x18: return rrR8(B);
+        case 0x19: return rrR8(C);
+        case 0x1A: return rrR8(D);
+        case 0x1B: return rrR8(E);
+        case 0x1C: return rrR8(H);
+        case 0x1D: return rrR8(L);
+        case 0x1E: return rrM8(HL);
+        case 0x1F: return rrR8(A);
+
+        case 0x20: return slaR8(B);
+        case 0x21: return slaR8(C);
+        case 0x22: return slaR8(D);
+        case 0x23: return slaR8(E);
+        case 0x24: return slaR8(H);
+        case 0x25: return slaR8(L);
+        case 0x26: return slaM8(HL);
+        case 0x27: return slaR8(A);
+
+        case 0x28: return sraR8(B);
+        case 0x29: return sraR8(C);
+        case 0x2A: return sraR8(D);
+        case 0x2B: return sraR8(E);
+        case 0x2C: return sraR8(H);
+        case 0x2D: return sraR8(L);
+        case 0x2E: return sraM8(HL);
+        case 0x2F: return sraR8(A);
+
         case 0x30: return swapR8(B);
         case 0x31: return swapR8(C);
         case 0x32: return swapR8(D);
@@ -307,6 +361,15 @@ uint16 CPU::prefixCB()
         case 0x35: return swapR8(L);
         case 0x36: return swapM8(HL);
         case 0x37: return swapR8(A);
+
+        case 0x38: return srlR8(B);
+        case 0x39: return srlR8(C);
+        case 0x3A: return srlR8(D);
+        case 0x3B: return srlR8(E);
+        case 0x3C: return srlR8(H);
+        case 0x3D: return srlR8(L);
+        case 0x3E: return srlM8(HL);
+        case 0x3F: return srlR8(A);
 
         case 0x40: return bitR8(B, 0);
         case 0x41: return bitR8(C, 0);

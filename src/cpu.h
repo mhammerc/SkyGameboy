@@ -224,6 +224,22 @@ private:
     uint16 rla();
     uint16 rra();
 
+    uint16 rlcR8(uint8 &reg);
+    uint16 rlcM8(uint16 addr);
+    uint16 rrcR8(uint8 &reg);
+    uint16 rrcM8(uint16 addr);
+    uint16 rlR8(uint8 &reg);
+    uint16 rlM8(uint16 addr);
+    uint16 rrR8(uint8 &reg);
+    uint16 rrM8(uint16 addr);
+
+    uint16 slaR8(uint8 &reg);
+    uint16 slaM8(uint16 addr);
+    uint16 sraR8(uint8 &reg);
+    uint16 sraM8(uint16 addr);
+    uint16 srlR8(uint8 &reg);
+    uint16 srlM8(uint16 addr);
+
     uint16 prefixCB();
 
     uint16 swapR8(uint8 &reg);

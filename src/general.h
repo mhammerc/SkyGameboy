@@ -22,14 +22,14 @@ typedef short int16;
 }
 
 template <typename Numeric>
-constexpr Numeric rol(Numeric val)
+[[nodiscard]] constexpr Numeric rol(Numeric val)
 {
     static_assert(std::is_unsigned<Numeric>::value, "Rotate Left only makes sense for unsigned types");
     return (val << 1) | (val >> (sizeof(Numeric) * CHAR_BIT - 1));
 }
 
 template <typename Numeric>
-constexpr Numeric ror(Numeric val)
+[[nodiscard]] constexpr Numeric ror(Numeric val)
 {
     static_assert(std::is_unsigned<Numeric>::value, "Rotate Left only makes sense for unsigned types");
     return (val >> 1) | (val << (sizeof(Numeric) * CHAR_BIT - 1));
