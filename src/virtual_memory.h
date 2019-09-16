@@ -43,6 +43,30 @@ private:
     uint8 oamRAM[0xA0];
     uint8 stackRAM[128];
 
+    /**
+     * Hold if an interrupt is requested
+     * Bit 0: Vertical blank interrupt
+     * Bit 1: LCD STAT interrupt
+     * Bit 2: Timer (TIMA) interrupt
+     * Bit 3: Serial interrupt
+     * Bit 4: Joypad interrupt
+     *
+     * CPU check these before each instruction.
+     *
+     * Read at 0xFF0F return these five bits. Remaining bits are always high.
+     * Write at 0xFF0F works. Last 3 bits are ignored.
+     */
+    uint8 interruptRequest = 0;
+    struct
+    {
+        const uint8 verticalBlank = 1u << 0u;
+        const uint8 lcdStat = 1u << 1u;
+        const uint8 TIMA = 1u << 2u;
+        const uint8 serial = 1u << 3u;
+        const uint8 joypad = 1u << 4u;
+        const uint8 alwaysSet = 1u << 5u | 1u << 6u | 1u << 7u;
+    } interruptRequestBits;
+
     /*
      * Hold clock count.
      * Read at 0xFF04 return the upper 8 bits of this counter.

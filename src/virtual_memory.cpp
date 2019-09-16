@@ -35,6 +35,11 @@ uint8 VirtualMemory::read8(const uint16 address)
         return static_cast<uint8>(dividerRegister >> 8u);
     }
 
+    if (address == 0xFF0F)
+    {
+        return interruptRequest | interruptRequestBits.alwaysSet;
+    }
+
     // working RAM
     if (address >= 0xC000 && address < 0xE000)
     {
@@ -77,6 +82,11 @@ void VirtualMemory::write8(const uint16 address, const uint8 value)
     {
         dividerRegister = 0;
         return;
+    }
+
+    if (address == 0xFF0F)
+    {
+        interruptRequest = value;
     }
 
     // working RAM
@@ -150,7 +160,9 @@ void VirtualMemory::updateTIMATimer(uint16 oldDividerRegister, uint16 amountAdde
 
    if (TIMA == 0)
    {
-       // TIMA overflow. reset it and interrupt if enabled.
+       // TIMA overflow. reset it
        TIMA = TAC;
+       // request interrupt
+       interruptRequest |= interruptRequestBits.TIMA;
    }
 }
