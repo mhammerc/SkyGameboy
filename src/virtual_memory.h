@@ -43,15 +43,50 @@ private:
     uint8 oamRAM[0xA0];
     uint8 stackRAM[128];
 
-    // I/O RAM
-    uint8 ioRAM[0x80];
-
     /*
      * Hold clock count.
      * Read at 0xFF04 return the upper 8 bits of this counter.
      * Write at 0xFF04 reset the whole counter.
+     * See `incrementDividerRegister` for low-level CPU clock increment.
      */
     uint16 dividerRegister = 0;
+
+    /**
+     * TIMA timer. See TMA and TAC.
+     * Read at 0xFF05 return the value.
+     * Write at 0xFF05 set the value.
+     */
+    uint8 TIMA = 0;
+
+    /**
+     * TMA timer.
+     * When TIMA overflow (TIMA > 255), TMA is loaded to TIMA.
+     * Read at 0xFF06 return the value.
+     * Write at 0xFF06 set the value.
+     */
+    uint8 TMA = 0;
+
+    /**
+     * TAC timer control.
+     * It enable/disable TIMA timer and sets its frequency.
+     * Read at 0xFF07 return the value.
+     * Write at 0xFF07:
+     *     - Bit [0,1]: set how often TIMA is incremented.
+     *                  0,0: 4096 Hz (every 1024 clocks)
+     *                  0,1: 262144 Hz (every 16 clocks)
+     *                  1,0: 65536 Hz (every 64 clocks)
+     *                  1,1: 16386 Hz (every 256 clocks)
+     *     - Bit [2]: if set, TIMA timer is enabled
+     *     - Bit [3..7]: ignored
+     */
+    uint8 TAC = 0;
+    struct
+    {
+        const uint8 freq = 1u << 0u | 1u << 1u;
+        const uint8 enabled = 1u << 2u;
+    } TACBits;
+
+    void updateTIMATimer(uint16 oldDividerRegister, uint16 amountAdded);
 };
 
 

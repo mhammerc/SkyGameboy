@@ -107,5 +107,50 @@ void VirtualMemory::write8(const uint16 address, const uint8 value)
 
 void VirtualMemory::incrementDividerRegister(uint8 amount)
 {
+    const uint16 oldDividerRegister = dividerRegister;
     dividerRegister += amount;
+
+    updateTIMATimer(oldDividerRegister, amount);
+}
+
+void VirtualMemory::updateTIMATimer(uint16 oldDividerRegister, uint16 amountAdded)
+{
+   if (!(TAC & TACBits.enabled))
+   {
+       return;
+   }
+
+   const uint8 freqFlag = TAC & TACBits.freq;
+   uint16 freqBit = 0;
+
+   if (freqFlag == 0)
+   {
+       freqBit = 1u << 9u;
+   }
+   if (freqFlag == 1)
+   {
+       freqBit = 1u << 3u;
+   }
+   if (freqFlag == 2)
+   {
+       freqBit = 1u << 5u;
+   }
+   if (freqFlag == 3)
+   {
+       freqBit = 1u << 7u;
+   }
+
+   // check if freqBit overflow. Same algorithm as half-carry
+   if (((oldDividerRegister ^ amountAdded ^ (oldDividerRegister + amountAdded)) ^ freqBit) == 0)
+   {
+       return;
+   }
+
+   ++TIMA;
+
+   if (TIMA == 0)
+   {
+       // TIMA overflow. reset it and interrupt if enabled.
+       TIMA = TAC;
+   }
 }

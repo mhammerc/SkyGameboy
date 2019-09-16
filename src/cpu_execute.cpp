@@ -166,7 +166,7 @@ uint16 CPU::retIf(uint8 flag, bool set)
 uint16 CPU::reti()
 {
     pop(PC);
-    setInterruptsEnabled(true);
+    setIME(true);
     return 16;
 }
 

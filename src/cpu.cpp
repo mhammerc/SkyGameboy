@@ -2,10 +2,10 @@
 
 void CPU::nextTick()
 {
-    if (!powerOn)
-    {
-        return;
-    }
+//    if (!powerOn)
+//    {
+//        return;
+//    }
 
     // fetch
     uint8 opcode = fetch8(PC);
@@ -23,9 +23,9 @@ void CPU::nextTick()
     std::this_thread::sleep_for(sleepFor);
 }
 
-void CPU::setInterruptsEnabled(bool enabled)
+void CPU::setIME(bool enabled)
 {
-    interruptsEnabled = enabled;
+    IME = enabled;
 }
 
 void CPU::setCPUPowerOn(bool powerOn)

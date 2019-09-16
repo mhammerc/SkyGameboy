@@ -30,14 +30,16 @@ private:
     int32 cycle_count = 0;
 
     /**
-     * Are interrupts enabled?
+     * IME - Interrupt Master Enable Flag
+     * false: disable jump to interrupt vectors
+     * true: enable jump to interrupt vectors
      */
-    bool interruptsEnabled = true;
+    bool IME = true;
     /**
-     * Enable or disable interrupts.
-     * @param enabled True to enable interrupts.
+     * Edit IME
+     * @param enabled bit to set to IME flag
      */
-    void setInterruptsEnabled(bool enabled);
+    void setIME(bool enabled);
 
     /**
      * Is CPU working? (fetch, execute, decode)

@@ -6,14 +6,15 @@
 #include "virtual_memory.h"
 #include "cpu.h"
 
+static const char *usage =
+R"(Usage: skygameboy <game ROM>
+    - game ROM: path to a Gameboy game to launch)";
+
 static std::string parseCLI(int argc, char **argv)
 {
     if (argc <= 1)
     {
-        std::cerr <<
-R"(Usage: skygameboy <game ROM>
-    - game ROM: path to a Gameboy game to launch)"
-                  << std::endl;
+        std::cerr << usage << std::endl;
 
         std::exit(1);
     }
