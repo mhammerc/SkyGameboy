@@ -6,7 +6,8 @@
 #include <iostream>
 
 #include "general.h"
-#include "file_reader.h"
+#include "files/file_reader_stack.h"
+#include "files/file_reader_heap.h"
 
 /**
  * It represent the MMU but also internal RAM & graphics RAM.
@@ -18,7 +19,8 @@
 class VirtualMemory
 {
 public:
-    explicit VirtualMemory(const std::string& biosRomPath): biosRom(biosRomPath)
+    explicit VirtualMemory(const std::string &biosRomPath, const std::string &gameROM):
+    biosRom(biosRomPath), gameROM(gameROM)
     {}
 
     // No copy
@@ -28,11 +30,14 @@ public:
     [[nodiscard]] uint8 read8(uint16 address);
     void write8(uint16 address, uint8 value);
 
-    void incrementDividerRegister();
+    void incrementDividerRegister(uint8 amount);
 
 private:
     bool readingBios = true;
-    const FileReader<256> biosRom;
+
+    static const size_t bootloaderSize = 256;
+    const FileReaderStack<bootloaderSize> biosRom;
+    const FileReaderHeap gameROM;
 
     uint8 workingRAM[0x2000];
     uint8 oamRAM[0xA0];
@@ -40,7 +45,13 @@ private:
 
     // I/O RAM
     uint8 ioRAM[0x80];
-    const size_t dividerRegisterIndex = 0x04;
+
+    /*
+     * Hold clock count.
+     * Read at 0xFF04 return the upper 8 bits of this counter.
+     * Write at 0xFF04 reset the whole counter.
+     */
+    uint16 dividerRegister = 0;
 };
 
 

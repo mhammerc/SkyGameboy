@@ -11,11 +11,11 @@
 class CPU
 {
 public:
-    explicit CPU(VirtualMemory &memory) : memory(memory)
+    explicit CPU(std::unique_ptr<VirtualMemory> &&memory) : memory(std::move(memory))
     {};
 
     // No copy
-    // Will be allowed later to allow for snapshots
+    // Will be allowed later to allow snapshots
     CPU(const CPU&) = delete;
     CPU& operator=(const CPU&) = delete;
 
@@ -126,7 +126,7 @@ private:
         const uint8 C = 1u << 4u;
     } FFlags;
 
-    VirtualMemory memory;
+    std::unique_ptr<VirtualMemory> memory;
 
     // Here live all processor instructions.
     // They all return cycle count consumed.

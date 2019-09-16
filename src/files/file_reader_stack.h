@@ -1,10 +1,10 @@
-#ifndef FRACTAL_FILE_READER_H
-#define FRACTAL_FILE_READER_H
+#ifndef FRACTAL_FILE_READER_STACK_H
+#define FRACTAL_FILE_READER_STACK_H
 
 #include <string>
 #include <fstream>
 
-#include "general.h"
+#include "../general.h"
 
 /**
  * Create `size` bytes buffer, and fill it with file data located at `path`.
@@ -20,7 +20,7 @@
  * Once a file is loaded, it is not editable.
  */
 template <const size_t size>
-class FileReader
+class FileReaderStack
 {
 public:
     // A non-mutable view of the data
@@ -31,7 +31,7 @@ public:
      *
      * @param path path to the file to read and fill in `data`
      */
-    explicit FileReader(const std::string &path)
+    explicit FileReaderStack(const std::string &path)
     {
         std::ifstream fileStream(path, std::ios::binary);
         if (!fileStream.is_open())
@@ -42,11 +42,11 @@ public:
         fileStream.read(reinterpret_cast<int8*>(mutable_data), size);
     }
 
-    FileReader& operator=(const FileReader&) = delete;
+    FileReaderStack& operator=(const FileReaderStack&) = delete;
 
 private:
     uint8 mutable_data[size] {};
 };
 
 
-#endif //FRACTAL_FILE_READER_H
+#endif //FRACTAL_FILE_READER_STACK_H

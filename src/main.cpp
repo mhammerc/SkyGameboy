@@ -1,16 +1,32 @@
+#include <string>
+#include <iostream>
+#include <cstdlib>
 #include <memory>
 
-#include "file_reader.h"
 #include "virtual_memory.h"
 #include "cpu.h"
 
-// startup:
-// 0x0000h = PC -> boot loader
-int main()
+static std::string parseCLI(int argc, char **argv)
 {
-    VirtualMemory virtualMemory("roms/dmg_boot.bin");
-//    VirtualMemory virtualMemory("/Users/mhammerc/Downloads/cpu_instrs/cpu_instrs.gb");
-    CPU cpu(virtualMemory);
+    if (argc <= 1)
+    {
+        std::cerr <<
+R"(Usage: skygameboy <game ROM>
+    - game ROM: path to a Gameboy game to launch)"
+                  << std::endl;
+
+        std::exit(1);
+    }
+
+    return std::string(argv[1]);
+}
+
+int main(int argc, char **argv)
+{
+    std::string gameROM = parseCLI(argc, argv);
+
+    auto virtualMemory = std::make_unique<VirtualMemory>("roms/dmg_boot.bin", gameROM);
+    CPU cpu(std::move(virtualMemory));
 
     while (true)
     {

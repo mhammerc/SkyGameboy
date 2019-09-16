@@ -3,13 +3,15 @@
 uint8 VirtualMemory::read8(const uint16 address)
 {
     // If we are in bios memory
-    if (readingBios && address < 0xFF)
+    if (address < 0xFF && readingBios)
     {
-        if (address == 0xFF - 1)
-        {
-            readingBios = false;
-        }
         return biosRom.data[address];
+    }
+
+    if (address < 0x4000)
+    {
+        readingBios = false;
+        return gameROM.data[address];
     }
 
     // Buttons pressed
@@ -30,7 +32,7 @@ uint8 VirtualMemory::read8(const uint16 address)
 
     if (address == 0xFF04)
     {
-        return ioRAM[dividerRegisterIndex];
+        return static_cast<uint8>(dividerRegister >> 8u);
     }
 
     // working RAM
@@ -73,7 +75,7 @@ void VirtualMemory::write8(const uint16 address, const uint8 value)
 
     if (address == 0xFF04)
     {
-        ioRAM[dividerRegisterIndex] = 0;
+        dividerRegister = 0;
         return;
     }
 
@@ -103,7 +105,7 @@ void VirtualMemory::write8(const uint16 address, const uint8 value)
     }
 }
 
-void VirtualMemory::incrementDividerRegister()
+void VirtualMemory::incrementDividerRegister(uint8 amount)
 {
-    ++ioRAM[dividerRegisterIndex];
+    dividerRegister += amount;
 }
