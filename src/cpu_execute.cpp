@@ -198,16 +198,16 @@ uint16 CPU::loadR8ToR8(uint8 &dest, uint8 src)
     return 4;
 }
 
-uint16 CPU::loadM8ToR8(uint8 &dest, uint8 addr)
+uint16 CPU::loadM8ToR8(uint8 &dest, uint16 addr)
 {
-    const uint8 value = fetch8(addr + 0xFF00);
+    const uint8 value = fetch8(addr);
     dest = value;
     return 8;
 }
 
-uint16 CPU::loadR8ToM8(uint8 addr, uint8 src)
+uint16 CPU::loadR8ToM8(uint16 addr, uint8 src)
 {
-    write8(addr + 0xFF00, src);
+    write8(addr, src);
     return 8;
 }
 

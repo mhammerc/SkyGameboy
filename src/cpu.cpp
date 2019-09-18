@@ -8,11 +8,22 @@ void CPU::nextTick()
 //    }
 
     // fetch
+    const uint16 oldPC = PC;
     uint8 opcode = fetch8(PC);
     ++PC;
 
     // decode & execute
-    const uint16 cycles = decodeThenExecute(opcode);
+    uint16 cycles = 0;
+    try
+    {
+        cycles = decodeThenExecute(opcode);
+    }
+    catch (std::exception &e)
+    {
+        std::cerr << std::hex << "Crash at PC=0x" << oldPC << ", opcode=0x" << +opcode << std::endl;
+        throw e;
+    }
+
     cycle_count += cycles;
     memory->incrementDividerRegister(cycles);
 

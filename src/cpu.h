@@ -169,8 +169,8 @@ private:
     uint16 loadD8ToR8(uint8 &reg);
     uint16 loadD8ToM8(uint16 addr);
     uint16 loadR8ToR8(uint8 &dest, uint8 src);
-    uint16 loadM8ToR8(uint8 &dest, uint8 addr);
-    uint16 loadR8ToM8(uint8 addr, uint8 src);
+    uint16 loadM8ToR8(uint8 &dest, uint16 addr);
+    uint16 loadR8ToM8(uint16 addr, uint8 src);
     uint16 loadR8ToM8Addr16(uint8 src);
     uint16 loadM8Addr16ToR8(uint8 &dest);
     uint16 loadR8ToM8Addr8(uint8 src);

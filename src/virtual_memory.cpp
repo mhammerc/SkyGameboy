@@ -3,14 +3,13 @@
 uint8 VirtualMemory::read8(const uint16 address)
 {
     // If we are in bios memory
-    if (address < 0xFF && readingBios)
+    if (address < 0xFF && biosRomDisabled == 0)
     {
         return biosRom.data[address];
     }
 
     if (address < 0x4000)
     {
-        readingBios = false;
         return gameROM.data[address];
     }
 
@@ -35,9 +34,29 @@ uint8 VirtualMemory::read8(const uint16 address)
         return static_cast<uint8>(dividerRegister >> 8u);
     }
 
+    if (address == 0xFF05)
+    {
+        return TIMA;
+    }
+
+    if (address == 0xFF06)
+    {
+        return TMA;
+    }
+
+    if (address == 0xFF07)
+    {
+        return TAC;
+    }
+
     if (address == 0xFF0F)
     {
         return interruptRequest | interruptRequestBits.alwaysSet;
+    }
+
+    if (address == 0xFF50)
+    {
+        return biosRomDisabled;
     }
 
     // working RAM
@@ -84,9 +103,29 @@ void VirtualMemory::write8(const uint16 address, const uint8 value)
         return;
     }
 
+    if (address == 0xFF05)
+    {
+        TIMA = value;
+    }
+
+    if (address == 0xFF06)
+    {
+        TMA = value;
+    }
+
+    if (address == 0xFF07)
+    {
+        TAC = value & ~TACBits.alwaysZero;
+    }
+
     if (address == 0xFF0F)
     {
         interruptRequest = value;
+    }
+
+    if (address == 0xFF50)
+    {
+        biosRomDisabled = value;
     }
 
     // working RAM

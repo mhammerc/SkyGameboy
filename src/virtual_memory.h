@@ -33,8 +33,6 @@ public:
     void incrementDividerRegister(uint8 amount);
 
 private:
-    bool readingBios = true;
-
     static const size_t bootloaderSize = 256;
     const FileReaderStack<bootloaderSize> biosRom;
     const FileReaderHeap gameROM;
@@ -108,9 +106,17 @@ private:
     {
         const uint8 freq = 1u << 0u | 1u << 1u;
         const uint8 enabled = 1u << 2u;
+        const uint8 alwaysZero = 1u << 3u | 1u << 4u | 1u << 5u | 1u << 6u | 1u << 7u;
     } TACBits;
 
     void updateTIMATimer(uint16 oldDividerRegister, uint16 amountAdded);
+
+    /**
+     * If different than 0, bios rom is disabled.
+     * Read at 0xFF50 return the value.
+     * Write at 0xFF50 write the value.
+     */
+     uint8 biosRomDisabled = 0;
 };
 
 
