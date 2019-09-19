@@ -6,7 +6,6 @@
 #include <iostream>
 
 #include "general.h"
-#include "LCD.h"
 #include "files/file_reader_stack.h"
 #include "files/file_reader_heap.h"
 

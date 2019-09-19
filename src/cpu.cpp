@@ -11,6 +11,7 @@ void CPU::nextTick()
     // fetch
     const uint16 oldPC = PC;
     uint8 opcode = fetch8(PC);
+//    std::cout << std::hex << "0x" << PC << std::endl;
     ++PC;
 
     // decode & execute

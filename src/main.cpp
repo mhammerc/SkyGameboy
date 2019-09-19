@@ -47,7 +47,7 @@ int main(int argc, char **argv)
 //
 //void pollEvents(sf::Window &window)
 //{
-//    sf::Event event;
+    //    sf::Event event;
 //    while (window.pollEvent(event))
 //    {
 //        if (event.type == sf::Event::Closed)

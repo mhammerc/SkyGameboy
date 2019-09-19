@@ -1,7 +1,11 @@
 #ifndef FRACTAL_LCD_H
 #define FRACTAL_LCD_H
 
+#include <array>
+#include <vector>
+
 #include "virtual_memory.h"
+#include "display.h"
 
 /**
  * Imagine LCD is a standalone chip in the Gameboy, being able to access
@@ -39,9 +43,23 @@ public:
      */
     void cycles(uint16 elapsedCycles);
 
+    static const constexpr std::array<std::array<uint8, 4>, 4> colors =
+    {{
+        {{255, 255, 255, 255}},
+        {{192, 192, 192, 255}},
+        {{96, 96, 96, 255}},
+        {{0, 0, 0, 255}}
+    }};
+
 private:
+    static const constexpr size_t WIDTH = 160;
+    static const constexpr size_t HEIGHT = 144;
+
     // it is owned by CPU
-    const VirtualMemory *memory;
+    VirtualMemory * const memory;
+public:
+    Display display;
+private:
 
     enum class Mode
     {
@@ -54,6 +72,8 @@ private:
 
     // Cycles elapsed for current mode
     uint16 currentElapsedCycles = 0;
+
+    std::vector<uint8> buffer = std::vector<uint8>(WIDTH * HEIGHT * 4, 0);
 
     void drawLine();
 };
