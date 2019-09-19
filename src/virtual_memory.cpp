@@ -51,7 +51,7 @@ uint8 VirtualMemory::read8(const uint16 address)
 
     if (address == 0xFF0F)
     {
-        return interruptRequest | interruptRequestBits.alwaysSet;
+        return interruptRequest | interruptBits.alwaysSet;
     }
 
     if (address == 0xFF50)
@@ -78,6 +78,11 @@ uint8 VirtualMemory::read8(const uint16 address)
     if (address >= 0xFF80 && address < 0xFFFE)
     {
         return stackRAM[address - 0xFF80];
+    }
+
+    if (address == 0xFFFF)
+    {
+        return interruptEnable | interruptBits.alwaysSet;
     }
 
     std::cerr << "Invalid read8 at address 0x" << std::hex << +address << std::endl;
@@ -152,6 +157,11 @@ void VirtualMemory::write8(const uint16 address, const uint8 value)
         stackRAM[address - 0xFF80] = value;
         return;
     }
+
+    if (address == 0xFFFF)
+    {
+        interruptEnable = value;
+    }
 }
 
 void VirtualMemory::incrementDividerRegister(uint8 amount)
@@ -202,6 +212,6 @@ void VirtualMemory::updateTIMATimer(uint16 oldDividerRegister, uint16 amountAdde
        // TIMA overflow. reset it
        TIMA = TAC;
        // request interrupt
-       interruptRequest |= interruptRequestBits.TIMA;
+       interruptRequest |= interruptBits.TIMA;
    }
 }

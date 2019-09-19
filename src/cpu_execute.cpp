@@ -123,6 +123,13 @@ uint16 CPU::JrIfD8(uint8 flag, bool set)
     return 12;
 }
 
+uint16 CPU::call(uint16 addr)
+{
+    push(PC);
+    PC = addr;
+    return 20;
+}
+
 uint16 CPU::callD16()
 {
     const uint16 addr = fetch16(PC);

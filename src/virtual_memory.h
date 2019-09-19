@@ -43,18 +43,29 @@ private:
 
     /**
      * Hold if an interrupt is requested
-     * Bit 0: Vertical blank interrupt
-     * Bit 1: LCD STAT interrupt
-     * Bit 2: Timer (TIMA) interrupt
-     * Bit 3: Serial interrupt
-     * Bit 4: Joypad interrupt
+     * Bit 0: Vertical blank interrupt [0x0040]
+     * Bit 1: LCD STAT interrupt [0x0048]
+     * Bit 2: Timer (TIMA) interrupt [0x0050]
+     * Bit 3: Serial interrupt [0x0058]
+     * Bit 4: Joypad interrupt [0x0060]
      *
-     * CPU check these before each instruction.
+     * CPU check these before each instructions.
      *
-     * Read at 0xFF0F return these five bits. Remaining bits are always high.
+     * Read at 0xFF0F return these five bits. Remaining bits are high.
      * Write at 0xFF0F works. Last 3 bits are ignored.
      */
     uint8 interruptRequest = 0;
+
+    /**
+     * Hold if interrupts are enabled. Same bit topology as `interruptRequest`.
+     * CPU check these before each instructions.
+     *
+     * Read at 0xFFFF return these five bits. Remaining bits are high.
+     * Write at 0xFFFF set the value. Last 3 bits are ignored.
+     */
+    uint8 interruptEnable = 0;
+
+public:
     struct
     {
         const uint8 verticalBlank = 1u << 0u;
@@ -63,9 +74,20 @@ private:
         const uint8 serial = 1u << 3u;
         const uint8 joypad = 1u << 4u;
         const uint8 alwaysSet = 1u << 5u | 1u << 6u | 1u << 7u;
-    } interruptRequestBits;
+    } interruptBits;
 
-    /*
+    struct
+    {
+        const uint16 verticalBlank = 0x0040u;
+        const uint16 lcdStat = 0x0048u;
+        const uint16 TIMA = 0x0050u;
+        const uint16 serial = 0x0058u;
+        const uint16 joypad = 0x0060u;
+    } interruptAddress;
+
+private:
+
+    /**
      * Hold clock count.
      * Read at 0xFF04 return the upper 8 bits of this counter.
      * Write at 0xFF04 reset the whole counter.

@@ -16,7 +16,9 @@ void CPU::nextTick()
     uint16 cycles = 0;
     try
     {
-        cycles = decodeThenExecute(opcode);
+        cycles = checkInterrupts();
+        if (cycles == 0)
+            cycles = decodeThenExecute(opcode);
     }
     catch (std::exception &e)
     {
@@ -32,6 +34,29 @@ void CPU::nextTick()
     // todo: too basic and inefficient. Do not take into account sleep inaccuracy
     const auto sleepFor = std::chrono::duration<long double, std::nano>(static_cast<long double>(cycles) / cycles_per_second * oneNanosecond);
     std::this_thread::sleep_for(sleepFor);
+}
+
+uint16 CPU::checkInterrupts()
+{
+    if (!IME)
+    {
+        return 0;
+    }
+
+    const uint8 interruptEnable = memory->read8(0xFFFF);
+    const uint8 interruptRequest = memory->read8(0xFF0F);
+
+    // if going out of HALT mode, takes 4 more cycles
+    uint16 cycles = 0;
+
+    if (interruptEnable & interruptRequest & memory->interruptBits.TIMA)
+    {
+        setIME(false);
+        cycles += call(memory->interruptAddress.TIMA);
+        return cycles;
+    }
+
+    return 0;
 }
 
 void CPU::setIME(bool enabled)

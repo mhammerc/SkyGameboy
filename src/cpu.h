@@ -35,11 +35,18 @@ private:
      * true: enable jump to interrupt vectors
      */
     bool IME = true;
+
     /**
      * Edit IME
      * @param enabled bit to set to IME flag
      */
     void setIME(bool enabled);
+
+    /**
+     * Check if interrupts must be executed and execute them.
+     * @return Cycles consumed if interrupt happen else 0
+     */
+    uint16 checkInterrupts();
 
     /**
      * Is CPU working? (fetch, execute, decode)
@@ -158,6 +165,8 @@ private:
     uint16 JRD8();
     uint16 JrIfD8(uint8 flag, bool set);
 
+    // This it not bind to any OP code. It is used internally for interrupts.
+    uint16 call(uint16 addr);
     uint16 callD16();
     uint16 callIfD16(uint8 flag, bool set);
     uint16 ret();
