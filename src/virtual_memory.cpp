@@ -59,6 +59,11 @@ uint8 VirtualMemory::read8(const uint16 address)
         return biosRomDisabled;
     }
 
+    // video RAM
+    if (address >= 0x8000 && address < 0x9FFF)
+    {
+        return videoRAM[address - 0x8000];
+    }
     // working RAM
     if (address >= 0xC000 && address < 0xE000)
     {
@@ -133,6 +138,12 @@ void VirtualMemory::write8(const uint16 address, const uint8 value)
         biosRomDisabled = value;
     }
 
+    // video RAM
+    if (address >= 0x8000 && address < 0x9FFF)
+    {
+        videoRAM[address - 0x8000] = value;
+        return;
+    }
     // working RAM
     if (address >= 0xC000 && address < 0xE000)
     {
@@ -162,6 +173,9 @@ void VirtualMemory::write8(const uint16 address, const uint8 value)
     {
         interruptEnable = value;
     }
+
+    // todo:
+    // graphics: 0xff46 which is a only writable register
 }
 
 void VirtualMemory::incrementDividerRegister(uint8 amount)
