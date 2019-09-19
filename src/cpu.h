@@ -7,12 +7,15 @@
 
 #include "general.h"
 #include "virtual_memory.h"
+#include "lcd.h"
 
 class CPU
 {
 public:
     explicit CPU(std::unique_ptr<VirtualMemory> &&memory) : memory(std::move(memory))
-    {};
+    {
+        lcd = std::make_unique<LCD>(this->memory.get());
+    };
 
     // No copy
     // Will be allowed later to allow snapshots
@@ -136,6 +139,7 @@ private:
     } FFlags;
 
     std::unique_ptr<VirtualMemory> memory;
+    std::unique_ptr<LCD> lcd;
 
     // Here live all processor instructions.
     // They all return cycle count consumed.

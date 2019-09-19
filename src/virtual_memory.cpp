@@ -90,6 +90,52 @@ uint8 VirtualMemory::read8(const uint16 address)
         return interruptEnable | interruptBits.alwaysSet;
     }
 
+    /// GRAPHICS
+    if (address == 0xFF40)
+    {
+        return lcdControl;
+    }
+    if (address == 0xFF41)
+    {
+        return STAT | STATBits.alwaysHigh;
+    }
+    if (address == 0xFF42)
+    {
+        return scrollY;
+    }
+    if (address == 0xFF43)
+    {
+        return scrollX;
+    }
+    if (address == 0xFF44)
+    {
+        return LY;
+    }
+    if (address == 0xFF45)
+    {
+        return LYC;
+    }
+    if (address == 0xFF47)
+    {
+        return backgroundPalette;
+    }
+    if (address == 0xFF48)
+    {
+        return objectPalette0;
+    }
+    if (address == 0xFF49)
+    {
+        return objectPalette1;
+    }
+    if (address == 0xFF4A)
+    {
+        return windowY;
+    }
+    if (address == 0xFF4B)
+    {
+        return windowX;
+    }
+
     std::cerr << "Invalid read8 at address 0x" << std::hex << +address << std::endl;
     throw std::invalid_argument("Invalid memory address read");
 }
@@ -174,8 +220,52 @@ void VirtualMemory::write8(const uint16 address, const uint8 value)
         interruptEnable = value;
     }
 
+    /// GRAPHICS
+
+    if (address == 0xFF40)
+    {
+        lcdControl = value;
+    }
+    if (address == 0xFF41)
+    {
+        STAT = value;
+    }
+    if (address == 0xFF42)
+    {
+        scrollY = value;
+    }
+    if (address == 0xFF43)
+    {
+        scrollX = value;
+    }
+    if (address == 0xFF45)
+    {
+        LYC = value;
+    }
+
     // todo:
     // graphics: 0xff46 which is a only writable register
+
+    if (address == 0xFF47)
+    {
+        backgroundPalette = value;
+    }
+    if (address == 0xFF48)
+    {
+        objectPalette0 = value;
+    }
+    if (address == 0xFF49)
+    {
+        objectPalette1 = value;
+    }
+    if (address == 0xFF4A)
+    {
+        windowY = value;
+    }
+    if (address == 0xFF4B)
+    {
+        windowX = value;
+    }
 }
 
 void VirtualMemory::incrementDividerRegister(uint8 amount)

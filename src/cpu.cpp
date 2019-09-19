@@ -1,4 +1,5 @@
 #include "cpu.h"
+#include "virtual_memory.h"
 
 void CPU::nextTick()
 {
@@ -28,6 +29,7 @@ void CPU::nextTick()
 
     cycle_count += cycles;
     memory->incrementDividerRegister(cycles);
+    lcd->cycles(cycles);
 
     const long double oneNanosecond = 1e+9;
 
@@ -49,10 +51,38 @@ uint16 CPU::checkInterrupts()
     // if going out of HALT mode, takes 4 more cycles
     uint16 cycles = 0;
 
+    if (interruptEnable & interruptRequest & memory->interruptBits.verticalBlank)
+    {
+        setIME(false);
+        cycles += call(memory->interruptAddress.verticalBlank);
+        return cycles;
+    }
+
+    if (interruptEnable & interruptRequest & memory->interruptBits.lcdStat)
+    {
+        setIME(false);
+        cycles += call(memory->interruptAddress.lcdStat);
+        return cycles;
+    }
+
     if (interruptEnable & interruptRequest & memory->interruptBits.TIMA)
     {
         setIME(false);
         cycles += call(memory->interruptAddress.TIMA);
+        return cycles;
+    }
+
+    if (interruptEnable & interruptRequest & memory->interruptBits.serial)
+    {
+        setIME(false);
+        cycles += call(memory->interruptAddress.serial);
+        return cycles;
+    }
+
+    if (interruptEnable & interruptRequest & memory->interruptBits.joypad)
+    {
+        setIME(false);
+        cycles += call(memory->interruptAddress.joypad);
         return cycles;
     }
 

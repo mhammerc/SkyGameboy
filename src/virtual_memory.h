@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include "general.h"
+#include "LCD.h"
 #include "files/file_reader_stack.h"
 #include "files/file_reader_heap.h"
 
@@ -33,6 +34,9 @@ public:
     void incrementDividerRegister(uint8 amount);
 
 private:
+    // Todo: remove
+    friend class LCD;
+
     static const size_t bootloaderSize = 256;
     const FileReaderStack<bootloaderSize> biosRom;
     const FileReaderHeap gameROM;
@@ -137,7 +141,8 @@ private:
     /**
      * If different than 0, bios rom is disabled.
      * Read at 0xFF50 return the value.
-     * Write at 0xFF50 write the value.
+     * Write of 1 at 0xFF50 write the value.
+     * Other writes are rejected.
      */
     uint8 biosRomDisabled = 0;
 
