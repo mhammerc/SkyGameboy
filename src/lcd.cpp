@@ -104,7 +104,6 @@ void LCD::drawLine()
         if (memory->lcdControl & memory->lcdControlBits.backgroundEnable)
         {
             // From current screen (X,Y), get address of current tilemap
-            // WHY 32?
             const uint16 currentTilemapIndex = (bgX / 8u) + ((bgY / 8u) * 32);
             const uint16 currentTilemapAddr = backgroundTilemapAddr + currentTilemapIndex;
 
