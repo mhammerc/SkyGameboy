@@ -80,7 +80,7 @@ uint8 VirtualMemory::read8(const uint16 address)
         return oamRAM[address - 0xFE00];
     }
     // stack RAM
-    if (address >= 0xFF80 && address < 0xFFFE)
+    if (address >= 0xFF80 && address < 0xFFFF)
     {
         return stackRAM[address - 0xFF80];
     }

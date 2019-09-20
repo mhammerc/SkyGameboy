@@ -64,7 +64,7 @@ uint16 CPU::decodeThenExecute(const uint8 opcode)
 
         case 0x18: return JRD8();
         case 0x20: return JrIfD8(F & FFlags.Z, false);
-        case 0x28: return JrIfD8(F & FFlags.Z, false);
+        case 0x28: return JrIfD8(F & FFlags.Z, true);
         case 0x30: return JrIfD8(F & FFlags.C, false);
         case 0x38: return JrIfD8(F & FFlags.C, true);
 

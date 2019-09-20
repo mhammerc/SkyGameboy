@@ -12,7 +12,7 @@
 class Display
 {
 public:
-    Display() : window(sf::VideoMode(windowSize.x, windowSize.y), "DMG")
+    Display() : window(sf::VideoMode(windowSize.x * 4, windowSize.y * 4), "DMG")
     {
         tex.create(160, 144);
     }
@@ -21,6 +21,7 @@ public:
     {
         tex.update(image.data());
         sf::Sprite s(tex);
+        s.scale(4, 4);
         window.clear(sf::Color::Black);
         window.draw(s);
         window.display();

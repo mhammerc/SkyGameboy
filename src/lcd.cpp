@@ -94,14 +94,19 @@ void LCD::drawLine()
     const bool tilemapSigned = tilesetAddr == 0x8800;
     const uint8 scrollX = memory->scrollX;
     const uint8 scrollY = memory->scrollY;
-    const size_t y = memory->LY + scrollY;
+    const size_t screenY = memory->LY;
+    const uint8 bgY = (screenY + scrollY) % HEIGHT;
 
-    for (size_t x = scrollX; x < scrollX + WIDTH; ++x)
+    for (size_t screenX = 0; screenX < WIDTH; ++screenX)
     {
+        const uint8 bgX = (scrollX + screenX) % WIDTH;
+
         if (memory->lcdControl & memory->lcdControlBits.backgroundEnable)
         {
             // From current screen (X,Y), get address of current tilemap
-            const uint16 currentTilemapAddr = backgroundTilemapAddr + (x / 8u) + ((y / 8u) * (WIDTH / 8u));
+            // WHY 32?
+            const uint16 currentTilemapIndex = (bgX / 8u) + ((bgY / 8u) * 32);
+            const uint16 currentTilemapAddr = backgroundTilemapAddr + currentTilemapIndex;
 
             // Get current id of the tile being drawn
             int16 currentTilesetId = 0;
@@ -114,11 +119,11 @@ void LCD::drawLine()
             const uint16 currentTilesetAddr = (currentTilesetId * 16) + tilesetAddr;
 
             // Get position inside the tile
-            const uint8 tilePosX = 7 - (x % 8u); // says which bit to read
-            const uint8 tilePosY = y % 8u * 2; // says which bytes (two bytes per line) to read
+            const uint8 tilePosX = 7 - (bgX % 8u); // says which bit to read
+            const uint8 tilePosY = bgY % 8u * 2; // says which bytes (two bytes per line) to read
 
             // address of both bytes for the current line of the tile
-            const uint8 tile0 = memory->read8(currentTilesetAddr + tilePosY);
+            const uint8 tile0 = memory->read8(currentTilesetAddr + tilePosY + 0);
             const uint8 tile1 = memory->read8(currentTilesetAddr + tilePosY + 1);
 
             // actual DMG color of the pixel [0;3]
@@ -126,11 +131,12 @@ void LCD::drawLine()
 
             // Get the SFML color
             std::array<uint8, 4> SFMLColor = colors[color];
+
             // print it in the final buffer
-            buffer[(x - scrollX + (y - scrollY) * WIDTH) * 4 + 0] = SFMLColor[0];
-            buffer[(x - scrollX + (y - scrollY) * WIDTH) * 4 + 1] = SFMLColor[1];
-            buffer[(x - scrollX + (y - scrollY) * WIDTH) * 4 + 2] = SFMLColor[2];
-            buffer[(x - scrollX + (y - scrollY) * WIDTH) * 4 + 3] = SFMLColor[3];
+            buffer[(screenX + (screenY * WIDTH)) * 4 + 0] = SFMLColor[0];
+            buffer[(screenX + (screenY * WIDTH)) * 4 + 1] = SFMLColor[1];
+            buffer[(screenX + (screenY * WIDTH)) * 4 + 2] = SFMLColor[2];
+            buffer[(screenX + (screenY * WIDTH)) * 4 + 3] = SFMLColor[3];
         }
     }
 }

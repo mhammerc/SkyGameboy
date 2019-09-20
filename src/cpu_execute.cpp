@@ -728,8 +728,6 @@ uint16 CPU::rrca()
 
 uint16 CPU::rla()
 {
-    F = 0;
-
     uint8 carryBit = A & (1u << 7u);
     A = rol(A);
 
@@ -742,6 +740,8 @@ uint16 CPU::rla()
         A &= ~1u;
     }
 
+    F = 0;
+
     if (carryBit)
     {
         F |= FFlags.C;
@@ -752,8 +752,6 @@ uint16 CPU::rla()
 
 uint16 CPU::rra()
 {
-    F = 0;
-
     uint8 carryBit = A & 1u;
     A = ror(A);
 
@@ -765,6 +763,8 @@ uint16 CPU::rra()
     {
         A &= ~(1u << 7u);
     }
+
+    F = 0;
 
     if (carryBit)
     {
@@ -824,8 +824,6 @@ uint16 CPU::rrcM8(uint16 addr)
 
 uint16 CPU::rlR8(uint8 &reg)
 {
-    F = 0;
-
     uint8 carryBit = reg & (1u << 7u);
     reg = rol(reg);
 
@@ -837,6 +835,8 @@ uint16 CPU::rlR8(uint8 &reg)
     {
         reg &= ~1u;
     }
+
+    F = 0;
 
     if (carryBit)
     {
@@ -860,8 +860,6 @@ uint16 CPU::rlM8(uint16 addr)
 
 uint16 CPU::rrR8(uint8 &reg)
 {
-    F = 0;
-
     uint8 carryBit = reg & 1u;
     reg = ror(reg);
 
@@ -873,6 +871,8 @@ uint16 CPU::rrR8(uint8 &reg)
     {
         reg &= ~(1u << 7u);
     }
+
+    F = 0;
 
     if (carryBit)
     {
