@@ -95,11 +95,11 @@ void LCD::drawLine()
     const uint8 scrollX = memory->scrollX;
     const uint8 scrollY = memory->scrollY;
     const size_t screenY = memory->LY;
-    const uint8 bgY = (screenY + scrollY) % HEIGHT;
+    const uint8 bgY = (screenY + scrollY);// % HEIGHT;
 
     for (size_t screenX = 0; screenX < WIDTH; ++screenX)
     {
-        const uint8 bgX = (scrollX + screenX) % WIDTH;
+        const uint8 bgX = (scrollX + screenX);// % WIDTH;
 
         if (memory->lcdControl & memory->lcdControlBits.backgroundEnable)
         {

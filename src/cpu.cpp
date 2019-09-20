@@ -31,11 +31,25 @@ void CPU::nextTick()
     memory->incrementDividerRegister(cycles);
     lcd->cycles(cycles);
 
-    const long double oneNanosecond = 1e+9;
 
-    // todo: too basic and inefficient. Do not take into account sleep inaccuracy
-    const auto sleepFor = std::chrono::duration<long double, std::nano>(static_cast<long double>(cycles) / static_cast<long double>(cycles_per_second) * oneNanosecond);
-    std::this_thread::sleep_for(sleepFor);
+    // Now time to make CPU timing.
+    // We can not sleep_for after each instruction. We wait for 5ms of instructions to execute then
+    // we wait for at least 5ms. If we actually waited 6ms, next time we will execute 6ms of instructions then wait 5ms again.
+    // This way, sleep_for inaccuracy is compensated and we get a smooth timing.
+    // Each time we sleep_for, the whole VM is paused.
+
+    const auto instructionExecutionTime = cycle_count * cycleTime;
+
+    if (minimumSleepTime + overSleepDuration < instructionExecutionTime)
+    {
+        cycle_count = 0;
+
+        const auto timeBeforeSleep = std::chrono::high_resolution_clock::now();
+        std::this_thread::sleep_for(minimumSleepTime);
+        const auto timeAfterSleep = std::chrono::high_resolution_clock::now();
+
+        overSleepDuration = (timeAfterSleep - timeBeforeSleep) - minimumSleepTime;
+    }
 }
 
 uint16 CPU::checkInterrupts()

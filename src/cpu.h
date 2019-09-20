@@ -29,7 +29,11 @@ public:
     void nextTick();
 
 private:
-    const int32 cycles_per_second = 4194304;
+    const long int cyclesPerSecond = 4194304;
+    const std::chrono::nanoseconds cycleTime = std::chrono::nanoseconds(static_cast<long int>(1e+9) / cyclesPerSecond);
+    const std::chrono::milliseconds minimumSleepTime {5};
+    std::chrono::nanoseconds overSleepDuration {0};
+
     int32 cycle_count = 0;
 
     /**
