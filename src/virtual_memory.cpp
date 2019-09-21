@@ -3,12 +3,13 @@
 uint8 VirtualMemory::read8(const uint16 address)
 {
     // If we are in bios memory
-    if (address < 0xFF && biosRomDisabled == 0)
+    if (address <= 0xFF && biosRomDisabled == 0)
     {
         return biosRom.data[address];
     }
 
-    if (address < 0x4000)
+    // TODO: [0x4000;0x8000[ is a switchable ROM
+    if (address < 0x8000)
     {
         return gameROM.data[address];
     }

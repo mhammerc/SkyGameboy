@@ -274,19 +274,23 @@ uint16 CPU::loadR16ToM16Addr16(uint16 src)
 
 uint16 CPU::LDHL()
 {
-    const uint8 value = fetch8(PC);
+    const auto value = static_cast<int8>(fetch8(PC));
     ++PC;
 
     F = 0;
-    if (SP + value < SP)
+    if (value >= 0)
     {
-        F |= FFlags.C;
+        if (((SP & 0xFF) + (value)) > 0xFF)
+            F |= FFlags.C;
+        if (((SP & 0xF) + (value & 0xF)) > 0xF)
+            F |= FFlags.H;
     }
-
-    // half-carry
-    if (((SP ^ value ^ (SP + value)) ^ 0x10) != 0)
+    else
     {
-        F |= FFlags.H;
+        if (((SP + value) & 0xFF) <= (SP & 0xFF))
+            F |= FFlags.C;
+        if (((SP + value) & 0xF) <= (SP & 0xF))
+            F |= FFlags.H;
     }
 
     HL = SP + value;
@@ -337,17 +341,11 @@ uint16 CPU::addR16ToHL(uint16 reg)
     F &= ~FFlags.N;
     F &= ~FFlags.H;
     F &= ~FFlags.C;
-    // carry
-    if (HL + reg < HL)
-    {
-        F |= FFlags.C;
-    }
 
-    // half-carry
-    if (((HL ^ reg ^ (HL + reg)) ^ 0x1000) != 0)
-    {
+    if (((HL & 0xFFFF) + (reg)) > 0xFFFF)
+        F |= FFlags.C;
+    if (((HL & 0xFFF) + (reg & 0xFFF)) > 0xFFF)
         F |= FFlags.H;
-    }
 
     HL += reg;
     return 8;
@@ -355,20 +353,25 @@ uint16 CPU::addR16ToHL(uint16 reg)
 
 uint16 CPU::addD8ToSP()
 {
-    const uint8 reg = fetch8(PC);
-    PC += 1;
+    const auto reg = static_cast<int8>(fetch8(PC));
+    ++PC;
     F = 0;
 
-    // carry
-    if (SP + reg < SP)
+    // Taken shamelessly from
+    // https://stackoverflow.com/a/7261149/3780971
+    if (reg >= 0)
     {
-        F |= FFlags.C;
+        if (((SP & 0xFF) + (reg)) > 0xFF)
+            F |= FFlags.C;
+        if (((SP & 0xF) + (reg & 0xF)) > 0xF)
+            F |= FFlags.H;
     }
-
-    // half-carry
-    if (((SP ^ reg ^ (SP + reg)) ^ 0x1000) != 0)
+    else
     {
-        F |= FFlags.H;
+        if (((SP + reg) & 0xFF) <= (SP & 0xFF))
+            F |= FFlags.C;
+        if (((SP + reg) & 0xF) <= (SP & 0xF))
+            F |= FFlags.H;
     }
 
     SP += reg;
@@ -609,7 +612,7 @@ uint16 CPU::cpR8ToA(uint8 reg)
         F |= FFlags.H;
     }
 
-    if (A - reg == 0)
+    if (A == reg)
     {
         F |= FFlags.Z;
     }

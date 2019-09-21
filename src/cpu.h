@@ -140,6 +140,7 @@ private:
         const uint8 N = 1u << 6u;
         const uint8 H = 1u << 5u;
         const uint8 C = 1u << 4u;
+        const uint8 alwaysLow = 1u << 0u | 1u << 1u | 1u << 2u | 1u << 3u;
     } FFlags;
 
     std::unique_ptr<VirtualMemory> memory;
