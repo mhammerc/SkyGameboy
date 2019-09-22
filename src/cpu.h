@@ -36,12 +36,21 @@ private:
 
     int32 cycle_count = 0;
 
+    void performCycleTiming();
+
     /**
      * IME - Interrupt Master Enable Flag
-     * false: disable jump to interrupt vectors
-     * true: enable jump to interrupt vectors
+     * DISABLED: disable jump to interrupt vectors
+     * ENABLED: enable jump to interrupt vectors
+     * ENABLED_AFTER: enable jump to interupt vectors after next instruction
      */
-    bool IME = true;
+    enum class IMEState
+    {
+        ENABLED,
+        DISABLED,
+        ENABLED_AFTER
+    };
+    IMEState IME = IMEState::DISABLED;
 
     /**
      * Edit IME
@@ -53,17 +62,26 @@ private:
      * Check if interrupts must be executed and execute them.
      * @return Cycles consumed if interrupt happen else 0
      */
-    uint16 checkInterrupts();
+    [[nodiscard]] uint16 checkInterrupts();
+    /**
+     * Called from checkInterrupts(), call the given interrupt.
+     * @return Cycles consumed
+     */
+    [[nodiscard]] uint16 callInterrupt(uint16 addr, uint8 interruptBit);
 
     /**
-     * Is CPU working? (fetch, execute, decode)
+     * Is CPU halted? (from instruction `halt`)
      */
-    bool powerOn = true;
+    bool isHalt = false;
     /**
-     * Stop or start CPU.
-     * @param powerOn True to start CPU.
+     * Pevious OPCode to simulate HALT bug.
      */
-    void setCPUPowerOn(bool powerOn);
+    uint8 previousOpcode = 0;
+
+    /**
+     * Halt CPU.
+     */
+    void halt();
 
     /**
      * Are graphics (display) on?

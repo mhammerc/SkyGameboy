@@ -94,6 +94,11 @@ uint8 CPU::carryAndHalfCarry<uint16, false>(uint16 a, uint16 b)
     return flag;
 }
 
+void CPU::halt()
+{
+    isHalt = true;
+}
+
 uint16 CPU::nop()
 {
     (void)this;

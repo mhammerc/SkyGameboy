@@ -39,6 +39,13 @@ private:
     static const size_t bootloaderSize = 256;
     const FileReaderStack<bootloaderSize> biosRom;
     const FileReaderHeap gameROM;
+    // Always MBC1 for now
+    uint8 currentROMBank = 1;
+    struct
+    {
+        const uint8 lowerBits = 1u << 0u | 1u << 1u | 1u << 2u | 1u << 3u | 1u << 4u;
+        const uint8 upperBits = 1u << 5u | 1u << 6u;
+    } ROMBankBits;
 
     uint8 workingRAM[0x2000];
     uint8 oamRAM[0xA0];
@@ -59,6 +66,13 @@ private:
      * Write at 0xFF0F works. Last 3 bits are ignored.
      */
     uint8 interruptRequest = 0;
+
+    /**
+     * Same as interruptRequest.
+     * TIMA interrupt is delayed one instruction before being set.
+     * When TIMA is triggered, it is enabled here first, then in interruptRequest.
+     */
+    uint8 interruptRequestAfter = 0;
 
     /**
      * Hold if interrupts are enabled. Same bit topology as `interruptRequest`.
@@ -108,7 +122,7 @@ private:
 
     /**
      * TMA timer.
-     * When TIMA overflow (TIMA > 255), TMA is loaded to TIMA.
+     * When TIMA overflow (TIMA > 255), TMA is loaded into TIMA.
      * Read at 0xFF06 return the value.
      * Write at 0xFF06 set the value.
      */

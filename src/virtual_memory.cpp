@@ -7,11 +7,14 @@ uint8 VirtualMemory::read8(const uint16 address)
     {
         return biosRom.data[address];
     }
-
-    // TODO: [0x4000;0x8000[ is a switchable ROM
-    if (address < 0x8000)
+    if (address < 0x4000)
     {
         return gameROM.data[address];
+    }
+
+    if (address < 0x8000)
+    {
+        return gameROM.data[(address - 0x4000) + (0x4000 * currentROMBank)];
     }
 
     // Buttons pressed
@@ -137,12 +140,31 @@ uint8 VirtualMemory::read8(const uint16 address)
         return windowX;
     }
 
-    std::cerr << "Invalid read8 at address 0x" << std::hex << +address << std::endl;
-    throw std::invalid_argument("Invalid memory address read");
+    // undefined memory is always high
+    return 0xFF;
 }
 
-void VirtualMemory::write8(const uint16 address, const uint8 value)
+void VirtualMemory::write8(const uint16 address, uint8 value)
 {
+    if (address >= 0x2000 && address < 0x4000)
+    {
+        value &= ROMBankBits.lowerBits;
+        if (value == 0)
+        {
+            value = 1;
+        }
+        currentROMBank |= value;
+        currentROMBank &= ROMBankBits.upperBits | value;
+
+    }
+    if (address >= 0x4000 && address < 0x6000)
+    {
+        value <<= 5u;
+        value &= ROMBankBits.upperBits;
+        currentROMBank |= value;
+        currentROMBank &= ROMBankBits.lowerBits | value;
+    }
+
     // serial port
     if (address == 0xFF01)
     {
@@ -172,11 +194,12 @@ void VirtualMemory::write8(const uint16 address, const uint8 value)
 
     if (address == 0xFF07)
     {
-        TAC = value & ~TACBits.alwaysZero;
+        TAC = value;
     }
 
     if (address == 0xFF0F)
     {
+        std::cout << "set interrupt request 0x" << std::hex << +value << std::endl;
         interruptRequest = value;
     }
 
@@ -279,44 +302,47 @@ void VirtualMemory::incrementDividerRegister(uint8 amount)
 
 void VirtualMemory::updateTIMATimer(uint16 oldDividerRegister, uint16 amountAdded)
 {
-   if (!(TAC & TACBits.enabled))
-   {
-       return;
-   }
+    interruptRequest |= interruptRequestAfter;
+    interruptRequestAfter = 0;
 
-   const uint8 freqFlag = TAC & TACBits.freq;
-   uint16 freqBit = 0;
+    if ((TAC & TACBits.enabled) == 0)
+    {
+        return;
+    }
 
-   if (freqFlag == 0)
-   {
-       freqBit = 1u << 9u;
-   }
-   if (freqFlag == 1)
-   {
-       freqBit = 1u << 3u;
-   }
-   if (freqFlag == 2)
-   {
-       freqBit = 1u << 5u;
-   }
-   if (freqFlag == 3)
-   {
-       freqBit = 1u << 7u;
-   }
+    const uint8 freqFlag = TAC & TACBits.freq;
+    uint16 overflow = 0;
 
-   // check if freqBit overflow. Same algorithm as half-carry
-   if (((oldDividerRegister ^ amountAdded ^ (oldDividerRegister + amountAdded)) ^ freqBit) == 0)
-   {
-       return;
-   }
+    if (freqFlag == 0)
+    {
+        overflow = 1023;
+    }
+    if (freqFlag == 1)
+    {
+        overflow = 15;
+    }
+    if (freqFlag == 2)
+    {
+        overflow = 63;
+    }
+    if (freqFlag == 3)
+    {
+        overflow = 255;
+    }
 
-   ++TIMA;
+    // check if freqBit overflow. Same as half-carry.
+    if (((oldDividerRegister & overflow) + (amountAdded & overflow)) <= overflow)
+    {
+        return;
+    }
 
-   if (TIMA == 0)
-   {
-       // TIMA overflow. reset it
-       TIMA = TAC;
-       // request interrupt
-       interruptRequest |= interruptBits.TIMA;
-   }
+    ++TIMA;
+
+    if (TIMA == 0)
+    {
+        // TIMA overflow. reset it
+        TIMA = TAC;
+        // request interrupt
+        interruptRequestAfter |= interruptBits.TIMA;
+    }
 }
