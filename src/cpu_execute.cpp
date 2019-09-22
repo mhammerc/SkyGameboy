@@ -1005,7 +1005,7 @@ uint16 CPU::swapM8(uint16 addr)
     uint8 value = fetch8(addr);
     swapR8(value);
     write8(addr, value);
-    return 8;
+    return 16;
 }
 
 uint16 CPU::bitR8(uint8 reg, uint8 bitIndex)

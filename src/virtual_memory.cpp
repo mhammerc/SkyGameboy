@@ -294,10 +294,23 @@ void VirtualMemory::write8(const uint16 address, uint8 value)
 
 void VirtualMemory::incrementDividerRegister(uint8 amount)
 {
-    const uint16 oldDividerRegister = dividerRegister;
+    uint16 oldDividerRegister = dividerRegister;
     dividerRegister += amount;
 
-    updateTIMATimer(oldDividerRegister, amount);
+    // TIMA may need to be incremented multiple time during one instruction.
+    // To make this happen, update TIMA with a maximum of 15 cycles multiple times.
+    uint8 substractedAmount = 0;
+    while (amount != 0)
+    {
+        substractedAmount = 10;
+        if (amount < 12)
+        {
+            substractedAmount = amount;
+        }
+        updateTIMATimer(oldDividerRegister, substractedAmount);
+        amount -= substractedAmount;
+        oldDividerRegister += substractedAmount;
+    }
 }
 
 void VirtualMemory::updateTIMATimer(uint16 oldDividerRegister, uint16 amountAdded)
@@ -333,6 +346,7 @@ void VirtualMemory::updateTIMATimer(uint16 oldDividerRegister, uint16 amountAdde
     // check if freqBit overflow. Same as half-carry.
     if (((oldDividerRegister & overflow) + (amountAdded & overflow)) <= overflow)
     {
+        // Did not overflow
         return;
     }
 
