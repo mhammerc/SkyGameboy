@@ -143,6 +143,36 @@ private:
         const uint8 alwaysLow = 1u << 0u | 1u << 1u | 1u << 2u | 1u << 3u;
     } FFlags;
 
+    /* Carry and Half carry
+     *
+     * Algorithm have been taken from https://stackoverflow.com/a/7261149/3780971
+     *
+     * It works for both signed and unsigned integers and `a + b` and `a - b`.
+     * It must be adapted if working from int8 or int16.
+     */
+    /**
+     * Compute carry and half carry for operation a + b or a - b.
+     * @tparam T Type to compute
+     * @tparam addition True if operation is `a + b`. False if operation is `a - b`.
+     * @param a first element
+     * @param b second element
+     * @return Return zero except for bit CARRY and HALF_CARRY set if needed.
+     */
+    template<typename T, bool addition = true>
+    uint8 carryAndHalfCarry(T a, T b);
+    template<>
+    uint8 carryAndHalfCarry<uint8, true>(uint8 a, uint8 b);
+    template<>
+    uint8 carryAndHalfCarry<int8, true>(int8 a, int8 b);
+    template<>
+    uint8 carryAndHalfCarry<uint16, true>(uint16 a, uint16 b);
+    template<>
+    uint8 carryAndHalfCarry<int16, true>(int16 a, int16 b);
+    template<>
+    uint8 carryAndHalfCarry<uint8, false>(uint8 a, uint8 b);
+    template<>
+    uint8 carryAndHalfCarry<uint16, false>(uint16 a, uint16 b);
+
     std::unique_ptr<VirtualMemory> memory;
     std::unique_ptr<LCD> lcd;
 

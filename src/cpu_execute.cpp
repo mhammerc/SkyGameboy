@@ -1,5 +1,99 @@
 #include "cpu.h"
 
+template<>
+uint8 CPU::carryAndHalfCarry<int8, true>(int8 a, int8 b)
+{
+    uint8 flag = 0;
+    if (b >= 0)
+    {
+        if (((a & 0xFF) + (b)) > 0xFF)
+            flag |= FFlags.C;
+        if (((a & 0xF) + (b & 0xF)) > 0xF)
+            flag |= FFlags.H;
+    }
+    else
+    {
+        if (((a + b) & 0xFF) <= (a & 0xFF))
+            flag |= FFlags.C;
+        if (((a + b) & 0xF) <= (a & 0xF))
+            flag |= FFlags.H;
+    }
+    return flag;
+}
+
+template<>
+uint8 CPU::carryAndHalfCarry<uint8, true>(uint8 a, uint8 b)
+{
+    uint8 flag = 0;
+
+    if (((a & 0xFF) + (b)) > 0xFF)
+        flag |= FFlags.C;
+    if (((a & 0xF) + (b & 0xF)) > 0xF)
+        flag |= FFlags.H;
+
+    return flag;
+}
+
+template<>
+uint8 CPU::carryAndHalfCarry<int16, true>(int16 a, int16 b)
+{
+    uint8 flag = 0;
+    if (b >= 0)
+    {
+        if (((a & 0xFFFF) + (b)) > 0xFFFF)
+            flag |= FFlags.C;
+        if (((a & 0xFFF) + (b & 0xFFF)) > 0xFFF)
+            flag |= FFlags.H;
+    }
+    else
+    {
+        if (((a + b) & 0xFFFF) <= (a & 0xFFFF))
+            flag |= FFlags.C;
+        if (((a + b) & 0xFFF) <= (a & 0xFFF))
+            flag |= FFlags.H;
+    }
+    return flag;
+}
+
+template<>
+uint8 CPU::carryAndHalfCarry<uint16, true>(uint16 a, uint16 b)
+{
+    uint8 flag = 0;
+
+    if (((a & 0xFFFF) + (b)) > 0xFFFF)
+        flag |= FFlags.C;
+    if (((a & 0xFFF) + (b & 0xFFF)) > 0xFFF)
+        flag |= FFlags.H;
+
+    return flag;
+}
+
+template<>
+uint8 CPU::carryAndHalfCarry<uint8, false>(uint8 a, uint8 b)
+{
+    uint8 flag = 0;
+
+    if (b > a)
+        flag |= FFlags.C;
+    if ((a & 0xF) - (b & 0xF) < 0)
+        flag |= FFlags.H;
+
+    return flag;
+}
+
+template<>
+uint8 CPU::carryAndHalfCarry<uint16, false>(uint16 a, uint16 b)
+{
+    uint8 flag = 0;
+
+    if (b > a)
+        flag |= FFlags.C;
+    if ((a & 0xFFF) - (b & 0xFFF) < 0)
+        flag |= FFlags.H;
+
+    return flag;
+}
+
 uint16 CPU::nop()
 {
     (void)this;
@@ -67,7 +161,7 @@ uint16 CPU::SCF()
 {
     F &= ~FFlags.N;
     F &= ~FFlags.H;
-    F ^= FFlags.C;
+    F |= FFlags.C;
     return 4;
 }
 
@@ -75,7 +169,7 @@ uint16 CPU::CCF()
 {
     F &= ~FFlags.N;
     F &= ~FFlags.H;
-    F |= FFlags.C;
+    F ^= FFlags.C;
     return 4;
 }
 
@@ -179,6 +273,7 @@ uint16 CPU::reti()
 
 uint16 CPU::rst(uint8 addr)
 {
+    push(PC);
     PC = static_cast<uint16>(addr);
     return 16;
 }
@@ -278,20 +373,7 @@ uint16 CPU::LDHL()
     ++PC;
 
     F = 0;
-    if (value >= 0)
-    {
-        if (((SP & 0xFF) + (value)) > 0xFF)
-            F |= FFlags.C;
-        if (((SP & 0xF) + (value & 0xF)) > 0xF)
-            F |= FFlags.H;
-    }
-    else
-    {
-        if (((SP + value) & 0xFF) <= (SP & 0xFF))
-            F |= FFlags.C;
-        if (((SP + value) & 0xF) <= (SP & 0xF))
-            F |= FFlags.H;
-    }
+    F |= carryAndHalfCarry<int8>(SP, value);
 
     HL = SP + value;
     return 12;
@@ -300,17 +382,7 @@ uint16 CPU::LDHL()
 uint16 CPU::addR8ToA(uint8 reg)
 {
     F = 0;
-    // carry
-    if (A + reg < A)
-    {
-        F |= FFlags.C;
-    }
-
-    // half-carry
-    if (((A ^ reg ^ (A + reg)) ^ 0x10) != 0)
-    {
-        F |= FFlags.H;
-    }
+    F |= carryAndHalfCarry<uint8>(A, reg);
 
     A += reg;
 
@@ -342,10 +414,7 @@ uint16 CPU::addR16ToHL(uint16 reg)
     F &= ~FFlags.H;
     F &= ~FFlags.C;
 
-    if (((HL & 0xFFFF) + (reg)) > 0xFFFF)
-        F |= FFlags.C;
-    if (((HL & 0xFFF) + (reg & 0xFFF)) > 0xFFF)
-        F |= FFlags.H;
+    F |= carryAndHalfCarry<uint16>(HL, reg);
 
     HL += reg;
     return 8;
@@ -357,22 +426,7 @@ uint16 CPU::addD8ToSP()
     ++PC;
     F = 0;
 
-    // Taken shamelessly from
-    // https://stackoverflow.com/a/7261149/3780971
-    if (reg >= 0)
-    {
-        if (((SP & 0xFF) + (reg)) > 0xFF)
-            F |= FFlags.C;
-        if (((SP & 0xF) + (reg & 0xF)) > 0xF)
-            F |= FFlags.H;
-    }
-    else
-    {
-        if (((SP + reg) & 0xFF) <= (SP & 0xFF))
-            F |= FFlags.C;
-        if (((SP + reg) & 0xF) <= (SP & 0xF))
-            F |= FFlags.H;
-    }
+    F |= carryAndHalfCarry<int8>(SP, reg);
 
     SP += reg;
 
@@ -381,24 +435,16 @@ uint16 CPU::addD8ToSP()
 
 uint16 CPU::adcR8ToA(uint8 reg)
 {
-    bool carry = (F & FFlags.C) != 0;
+    bool carry = F & FFlags.C;
+
     F = 0;
+    F |= carryAndHalfCarry<uint8>(A, reg);
 
     if (carry)
     {
+        F |= carryAndHalfCarry<uint8>(reg, 1);
         ++reg;
-    }
-
-    // carry
-    if (A + reg < A || (carry && reg == 0))
-    {
-        F |= FFlags.C;
-    }
-
-    // half-carry
-    if (((A ^ reg ^ (A + reg)) ^ 0x10) != 0)
-    {
-        F |= FFlags.H;
+        F |= carryAndHalfCarry<uint8>(A, reg);
     }
 
     A += reg;
@@ -429,18 +475,7 @@ uint16 CPU::subR8ToA(uint8 reg)
 {
     F = 0;
     F |= FFlags.N;
-
-    // carry
-    if (reg > A)
-    {
-        F |= FFlags.C;
-    }
-
-    // half-carry
-    if (((A ^ (-reg) ^ (A - reg)) ^ 0x10) != 0)
-    {
-        F |= FFlags.H;
-    }
+    F |= carryAndHalfCarry<uint8, false>(A, reg);
 
     A -= reg;
     if (A == 0)
@@ -468,25 +503,17 @@ uint16 CPU::subD8ToA()
 
 uint16 CPU::sbcR8ToA(uint8 reg)
 {
-    bool carry = (F & FFlags.C) != 0;
+    bool carry = F & FFlags.C;
+
     F = 0;
     F |= FFlags.N;
+    F |= carryAndHalfCarry<uint8, false>(A, reg);
 
     if (carry)
     {
+        F |= carryAndHalfCarry<uint8>(reg, 1);
         ++reg;
-    }
-
-    // carry
-    if (reg > A || (carry && reg == 0))
-    {
-        F |= FFlags.C;
-    }
-
-    // half-carry
-    if (((A ^ (-reg) ^ (A + reg)) ^ 0x10) != 0)
-    {
-        F |= FFlags.H;
+        F |= carryAndHalfCarry<uint8, false>(A, reg);
     }
 
     A -= reg;
@@ -599,18 +626,7 @@ uint16 CPU::cpR8ToA(uint8 reg)
 {
     F = 0;
     F |= FFlags.N;
-
-    // carry
-    if (reg > A)
-    {
-        F |= FFlags.C;
-    }
-
-    // half-carry
-    if (((A ^ (-reg) ^ (A - reg)) ^ 0x10) != 0)
-    {
-        F |= FFlags.H;
-    }
+    F |= carryAndHalfCarry<uint8, false>(A, reg);
 
     if (A == reg)
     {
@@ -637,14 +653,11 @@ uint16 CPU::cpD8ToA()
 
 uint16 CPU::incR8(uint8 &reg)
 {
-    F &= ~FFlags.H;
     F &= ~FFlags.Z;
     F &= ~FFlags.N;
 
-    if (((reg ^ 1 ^ (reg + 1)) ^ 0x10) != 0)
-    {
-        F |= FFlags.H;
-    }
+    F &= ~FFlags.H;
+    F |= carryAndHalfCarry<uint8, true>(reg, 1) & FFlags.H;
 
     ++reg;
 
@@ -672,14 +685,11 @@ uint16 CPU::incR16(uint16 &reg)
 
 uint16 CPU::decR8(uint8 &reg)
 {
-    F &= ~FFlags.H;
     F &= ~FFlags.Z;
     F |= FFlags.N;
 
-    if (((reg ^ (-static_cast<uint8>(1u)) ^ (reg - 1u)) ^ 0x10u) != 0)
-    {
-        F |= FFlags.H;
-    }
+    F &= ~FFlags.H;
+    F |= carryAndHalfCarry<uint8, false>(reg, 1) & FFlags.H;
 
     --reg;
 
@@ -926,16 +936,13 @@ uint16 CPU::sraR8(uint8 &reg)
 {
     F = 0;
 
+    const uint8 bit7 = reg & (1u << 7u);
     if (reg & 1u)
     {
         F |= FFlags.C;
     }
     reg >>= 1u;
-
-    if (F & FFlags.C)
-    {
-        reg |= (1u << 7u);
-    }
+    reg |= bit7;
 
     if (reg == 0)
     {
@@ -980,12 +987,11 @@ uint16 CPU::srlM8(uint16 addr)
 uint16 CPU::swapR8(uint8 &reg)
 {
     F = 0;
-
+    reg = ((reg & 0xF0u) >> 4u) | ((reg & 0x0Fu) << 4u);
     if (reg == 0)
     {
         F |= FFlags.Z;
     }
-    reg = (reg & 0xF0u >> 4u) | (reg & 0x0Fu << 4u);
     return 8;
 }
 
