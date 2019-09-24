@@ -96,6 +96,15 @@ uint8 CPU::carryAndHalfCarry<uint16, false>(uint16 a, uint16 b)
 
 void CPU::halt()
 {
+    if (IME == IMEState::DISABLED || IME == IMEState::ENABLED_AFTER)
+    {
+        if (checkInterrupts())
+        {
+            missOnePCIncrement = true;
+            return;
+        }
+    }
+
     isHalt = true;
 }
 

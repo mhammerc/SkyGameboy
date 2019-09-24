@@ -4,6 +4,9 @@
 #include <memory>
 #include <thread>
 #include <chrono>
+#include <optional>
+
+#include <dbg.h>
 
 #include "general.h"
 #include "virtual_memory.h"
@@ -59,24 +62,31 @@ private:
     void setIME(bool enabled);
 
     /**
+     * Struct representing a requested interrupt.
+     */
+    struct RequestedInterrupt
+    {
+        // Vector address of the interrupt
+        const uint16 addr;
+        // Bit representing the interrupt in various registers
+        const uint8 bit;
+    };
+
+    /**
      * Check if interrupts must be executed and execute them.
      * @return Cycles consumed if interrupt happen else 0
      */
-    [[nodiscard]] uint16 checkInterrupts();
+    [[nodiscard]] std::optional<RequestedInterrupt> checkInterrupts();
     /**
-     * Called from checkInterrupts(), call the given interrupt.
+     * Call the given interrupt.
      * @return Cycles consumed
      */
-    [[nodiscard]] uint16 callInterrupt(uint16 addr, uint8 interruptBit);
+    [[nodiscard]] uint16 callInterrupt(RequestedInterrupt requestedInterrupt);
 
     /**
      * Is CPU halted? (from instruction `halt`)
      */
     bool isHalt = false;
-    /**
-     * Pevious OPCode to simulate HALT bug.
-     */
-    uint8 previousOpcode = 0;
 
     /**
      * Halt CPU.
@@ -151,6 +161,11 @@ private:
 
     uint16 SP = 0;
     uint16 PC = 0;
+
+    /**
+     * Only for HALT bug. Miss one PC increment.
+     */
+    bool missOnePCIncrement = false;
 
     struct
     {

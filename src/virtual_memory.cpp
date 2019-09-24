@@ -199,7 +199,6 @@ void VirtualMemory::write8(const uint16 address, uint8 value)
 
     if (address == 0xFF0F)
     {
-        std::cout << "set interrupt request 0x" << std::hex << +value << std::endl;
         interruptRequest = value;
     }
 

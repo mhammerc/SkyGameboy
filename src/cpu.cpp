@@ -10,7 +10,15 @@ void CPU::nextTick()
     uint16 cycles = 0;
     try
     {
-        cycles = checkInterrupts();
+        std::optional<RequestedInterrupt> interrupt = checkInterrupts();
+        if (interrupt && IME == IMEState::ENABLED)
+        {
+            cycles = callInterrupt(interrupt.value());
+        }
+        else if (interrupt)
+        {
+            isHalt = false;
+        }
 
         if (IME == IMEState::ENABLED_AFTER)
         {
@@ -19,11 +27,12 @@ void CPU::nextTick()
 
         if (!isHalt && cycles == 0)
         {
-            // Simulate HALT bug
-            if (previousOpcode != 0x76)
-            {
-                ++PC;
-            }
+            // Simulate HALT bug which fails to increment PC for one instruction.
+            // It would be easier to read with a `if()` but this is faster and avoid a jump.
+            PC -= static_cast<uint8>(missOnePCIncrement);
+            missOnePCIncrement = false;
+            ++PC;
+
             cycles = decodeThenExecute(opcode);
         }
         else if (cycles == 0)
@@ -37,7 +46,6 @@ void CPU::nextTick()
         exit(1);
     }
 
-    previousOpcode = opcode;
     F &= ~FFlags.alwaysLow;
     cycle_count += cycles;
     memory->incrementDividerRegister(cycles);
@@ -67,61 +75,51 @@ void CPU::performCycleTiming()
     }
 }
 
-uint16 CPU::checkInterrupts()
+std::optional<CPU::RequestedInterrupt> CPU::checkInterrupts()
 {
-    if ((IME == IMEState::DISABLED || IME == IMEState::ENABLED_AFTER) && !isHalt)
-    {
-        return 0;
-    }
-
     const uint8 interruptEnable = memory->read8(0xFFFF);
     const uint8 interruptRequest = memory->read8(0xFF0F);
 
     if (interruptEnable & interruptRequest & memory->interruptBits.verticalBlank)
     {
-        return callInterrupt(memory->interruptAddress.verticalBlank, memory->interruptBits.verticalBlank);
+        return RequestedInterrupt {memory->interruptAddress.verticalBlank, memory->interruptBits.verticalBlank};
     }
 
     if (interruptEnable & interruptRequest & memory->interruptBits.lcdStat)
     {
-        return callInterrupt(memory->interruptAddress.lcdStat, memory->interruptBits.lcdStat);
+        return RequestedInterrupt {memory->interruptAddress.lcdStat, memory->interruptBits.lcdStat};
     }
 
     if (interruptEnable & interruptRequest & memory->interruptBits.TIMA)
     {
-        return callInterrupt(memory->interruptAddress.TIMA, memory->interruptBits.TIMA);
+        return RequestedInterrupt {memory->interruptAddress.TIMA, memory->interruptBits.TIMA};
     }
 
     if (interruptEnable & interruptRequest & memory->interruptBits.serial)
     {
-        return callInterrupt(memory->interruptAddress.serial, memory->interruptBits.serial);
+        return RequestedInterrupt {memory->interruptAddress.serial, memory->interruptBits.serial};
     }
 
     if (interruptEnable & interruptRequest & memory->interruptBits.joypad)
     {
-        return callInterrupt(memory->interruptAddress.joypad, memory->interruptBits.joypad);
+        return RequestedInterrupt {memory->interruptAddress.joypad, memory->interruptBits.joypad};
     }
 
-    return 0;
+    return std::nullopt;
 }
 
-uint16 CPU::callInterrupt(uint16 addr, uint8 interruptBit)
+uint16 CPU::callInterrupt(RequestedInterrupt requestedInterrupt)
 {
-    if ((IME == IMEState::DISABLED || IME == IMEState::ENABLED_AFTER) && isHalt)
-    {
-        isHalt = false;
-        return 0;
-    }
-
+    // Disable interrupt request from IF flag
     uint8 interruptRequest = memory->read8(0xFF0F);
-    interruptRequest &= ~interruptBit;
+    interruptRequest &= ~requestedInterrupt.bit;
     memory->write8(0xFF0F, interruptRequest);
 
     setIME(false);
 
-    uint16 cycles = isHalt ? 4 : 0;
+    uint16 cycles = isHalt * 4;
     isHalt = false;
-    return call(addr) + cycles;
+    return call(requestedInterrupt.addr) + cycles;
 }
 
 void CPU::setIME(bool enabled)

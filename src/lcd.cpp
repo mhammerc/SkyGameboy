@@ -23,8 +23,9 @@ void LCD::cycles(uint16 elapsedCycles)
 
             if (memory->STAT & memory->STATBits.mode1Enable)
             {
-                memory->interruptRequest |= memory->interruptBits.verticalBlank;
+                memory->interruptRequest |= memory->interruptBits.lcdStat;
             }
+            memory->interruptRequest |= memory->interruptBits.verticalBlank;
         }
         else
         {
