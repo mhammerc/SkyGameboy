@@ -295,14 +295,15 @@ void VirtualMemory::incrementDividerRegister(uint8 amount)
 {
     uint16 oldDividerRegister = dividerRegister;
     dividerRegister += amount;
+    const uint8 threshold = 15;
 
     // TIMA may need to be incremented multiple time during one instruction.
     // To make this happen, update TIMA with a maximum of 15 cycles multiple times.
     uint8 substractedAmount = 0;
     while (amount != 0)
     {
-        substractedAmount = 10;
-        if (amount < 12)
+        substractedAmount = threshold;
+        if (amount < threshold)
         {
             substractedAmount = amount;
         }
