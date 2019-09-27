@@ -190,18 +190,6 @@ private:
      */
     template<typename T, bool addition = true>
     [[nodiscard]] uint8 carryAndHalfCarry(T a, T b);
-    template<>
-    [[nodiscard]] uint8 carryAndHalfCarry<uint8, true>(uint8 a, uint8 b);
-    template<>
-    [[nodiscard]] uint8 carryAndHalfCarry<int8, true>(int8 a, int8 b);
-    template<>
-    [[nodiscard]] uint8 carryAndHalfCarry<uint16, true>(uint16 a, uint16 b);
-    template<>
-    [[maybe_unused]] [[nodiscard]] uint8 carryAndHalfCarry<int16, true>(int16 a, int16 b);
-    template<>
-    [[nodiscard]] uint8 carryAndHalfCarry<uint8, false>(uint8 a, uint8 b);
-    template<>
-    [[nodiscard]] uint8 carryAndHalfCarry<uint16, false>(uint16 a, uint16 b);
 
     // Here live all processor instructions.
     // They all return cycle count consumed.

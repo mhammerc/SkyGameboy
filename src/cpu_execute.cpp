@@ -1,7 +1,7 @@
 #include "cpu.h"
 
 template<>
-uint8 CPU::carryAndHalfCarry<int8, true>(int8 a, int8 b)
+[[nodiscard]] uint8 CPU::carryAndHalfCarry<int8, true>(int8 a, int8 b)
 {
     uint8 flag = 0;
     if (b >= 0)
@@ -22,7 +22,7 @@ uint8 CPU::carryAndHalfCarry<int8, true>(int8 a, int8 b)
 }
 
 template<>
-uint8 CPU::carryAndHalfCarry<uint8, true>(uint8 a, uint8 b)
+[[nodiscard]] uint8 CPU::carryAndHalfCarry<uint8, true>(uint8 a, uint8 b)
 {
     uint8 flag = 0;
 
@@ -35,7 +35,7 @@ uint8 CPU::carryAndHalfCarry<uint8, true>(uint8 a, uint8 b)
 }
 
 template<>
-uint8 CPU::carryAndHalfCarry<int16, true>(int16 a, int16 b)
+[[maybe_unused]] [[nodiscard]] uint8 CPU::carryAndHalfCarry<int16, true>(int16 a, int16 b)
 {
     uint8 flag = 0;
     if (b >= 0)
@@ -56,7 +56,7 @@ uint8 CPU::carryAndHalfCarry<int16, true>(int16 a, int16 b)
 }
 
 template<>
-uint8 CPU::carryAndHalfCarry<uint16, true>(uint16 a, uint16 b)
+[[nodiscard]] uint8 CPU::carryAndHalfCarry<uint16, true>(uint16 a, uint16 b)
 {
     uint8 flag = 0;
 
@@ -69,7 +69,7 @@ uint8 CPU::carryAndHalfCarry<uint16, true>(uint16 a, uint16 b)
 }
 
 template<>
-uint8 CPU::carryAndHalfCarry<uint8, false>(uint8 a, uint8 b)
+[[nodiscard]] uint8 CPU::carryAndHalfCarry<uint8, false>(uint8 a, uint8 b)
 {
     uint8 flag = 0;
 
@@ -82,7 +82,7 @@ uint8 CPU::carryAndHalfCarry<uint8, false>(uint8 a, uint8 b)
 }
 
 template<>
-uint8 CPU::carryAndHalfCarry<uint16, false>(uint16 a, uint16 b)
+[[nodiscard]] uint8 CPU::carryAndHalfCarry<uint16, false>(uint16 a, uint16 b)
 {
     uint8 flag = 0;
 
