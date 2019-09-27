@@ -47,29 +47,32 @@ void CPU::nextTick()
     }
 
     F &= ~FFlags.alwaysLow;
-    cycle_count += cycles;
     memory.incrementDividerRegister(cycles);
     lcd.cycles(cycles);
-    performCycleTiming();
+    performCycleTiming(cycles);
 }
 
-void CPU::performCycleTiming()
+void CPU::performCycleTiming(uint16 cycles)
 {
     // Now time to make CPU timing.
     // We can not sleep_for after each instruction. We wait for 5ms of instructions to execute then
     // we wait for at least 5ms. If we actually waited 6ms, next time we will execute 6ms of instructions then wait 5ms again.
     // This way, sleep_for inaccuracy is compensated and we get a smooth timing.
     // Each time we sleep_for, the whole VM is paused.
+    using namespace std::chrono;
+    using namespace std::this_thread;
 
+    static size_t cycle_count = 0;
+    cycle_count += cycles;
     const auto instructionExecutionTime = cycle_count * cycleTime;
 
     if (minimumSleepTime + overSleepDuration < instructionExecutionTime)
     {
         cycle_count = 0;
 
-        const auto timeBeforeSleep = std::chrono::high_resolution_clock::now();
-        std::this_thread::sleep_for(minimumSleepTime);
-        const auto timeAfterSleep = std::chrono::high_resolution_clock::now();
+        const auto timeBeforeSleep = high_resolution_clock::now();
+        sleep_for(minimumSleepTime);
+        const auto timeAfterSleep = high_resolution_clock::now();
 
         overSleepDuration = (timeAfterSleep - timeBeforeSleep) - minimumSleepTime;
     }
@@ -129,12 +132,6 @@ void CPU::setIME(bool enabled)
         return;
     }
     IME = enabled ? IMEState::ENABLED_AFTER : IMEState::DISABLED;
-}
-
-// todo
-void CPU::setGraphicsOn(bool graphicsOn)
-{
-    this->graphicsOn = graphicsOn;
 }
 
 uint8 CPU::fetch8(const uint16 addr)

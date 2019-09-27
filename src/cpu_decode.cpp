@@ -9,7 +9,8 @@ uint16 CPU::decodeThenExecute(const uint8 opcode)
         case 0xF3: { setIME(false); return 4; }
         case 0xFB: { setIME(true); return 4; }
 
-        case 0x76: { halt(); return 4; }
+        case 0x76: return halt();
+        // todo
 //        case 0x10: { setCPUPowerOn(false); setGraphicsOn(false); ++PC; return 4; }
 
         case 0x07: return rlca();

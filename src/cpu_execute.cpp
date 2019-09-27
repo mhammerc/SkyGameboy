@@ -94,18 +94,22 @@ uint8 CPU::carryAndHalfCarry<uint16, false>(uint16 a, uint16 b)
     return flag;
 }
 
-void CPU::halt()
+uint16 CPU::halt()
 {
+    // If IME is disabled and we have interrupt waiting to be serviced...
     if (IME == IMEState::DISABLED || IME == IMEState::ENABLED_AFTER)
     {
         if (checkInterrupts())
         {
+            // Do not halt but execute twice next instruction
             missOnePCIncrement = true;
-            return;
+            return 4;
         }
     }
 
+    // Else we can halt
     isHalt = true;
+    return 4;
 }
 
 uint16 CPU::nop()
@@ -138,8 +142,8 @@ uint16 CPU::DAA()
     const bool FN = F & FFlags.N;
     const bool FC = F & FFlags.C;
 
-    uint8 setFC = false;
-    if (FH || (!FN && (A & 0xfu) > 9))
+    uint8 setFlagC = false;
+    if (FH || (!FN && (A & 0xFu) > 9))
     {
         correction |= 0x6u;
     }
@@ -147,17 +151,17 @@ uint16 CPU::DAA()
     if (FC || (!FN && A > 0x99u))
     {
         correction |= 0x60u;
-        setFC = FFlags.C;
+        setFlagC = FFlags.C;
     }
 
     A += FN ? -correction : correction;
 
-    A &= 0xffu;
+    A &= 0xFFu;
 
     const uint8 setFlagZ = A == 0 ? FFlags.Z : 0;
 
     F &= ~(FFlags.H | FFlags.Z | FFlags.C);
-    F |= setFC | setFlagZ;
+    F |= setFlagC | setFlagZ;
 
     return 4;
 }
@@ -310,6 +314,7 @@ uint16 CPU::loadD8ToM8(uint16 addr)
 
 uint16 CPU::loadR8ToR8(uint8 &dest, uint8 src)
 {
+    (void)this;
     dest = src;
     return 4;
 }
@@ -361,6 +366,7 @@ uint16 CPU::loadM8Addr8ToR8()
 
 uint16 CPU::loadR16ToR16(uint16 &dest, uint16 src)
 {
+    (void)this;
     dest = src;
     return 8;
 }
@@ -693,6 +699,7 @@ uint16 CPU::incM8(uint16 addr)
 
 uint16 CPU::incR16(uint16 &reg)
 {
+    (void)this;
     ++reg;
     return 8;
 }
@@ -725,6 +732,7 @@ uint16 CPU::decM8(uint16 addr)
 
 uint16 CPU::decR16(uint16 &reg)
 {
+    (void)this;
     --reg;
     return 8;
 }
@@ -1017,7 +1025,7 @@ uint16 CPU::swapM8(uint16 addr)
     return 16;
 }
 
-uint16 CPU::bitR8(uint8 reg, uint8 bitIndex)
+uint16 CPU::bitR8(uint8 reg, const uint8 bitIndex)
 {
     F &= ~FFlags.N;
     F |= FFlags.H;
@@ -1033,21 +1041,21 @@ uint16 CPU::bitR8(uint8 reg, uint8 bitIndex)
     return 8;
 }
 
-uint16 CPU::bitM8(uint16 addr, uint8 bitIndex)
+uint16 CPU::bitM8(uint16 addr, const uint8 bitIndex)
 {
     const uint8 value = fetch8(addr);
     bitR8(value, bitIndex);
     return 12;
 }
 
-uint16 CPU::setR8(uint8 &reg, uint8 bitIndex)
+uint16 CPU::setR8(uint8 &reg, const uint8 bitIndex)
 {
     (void)this;
     reg |= 1u << bitIndex;
     return 8;
 }
 
-uint16 CPU::setM8(uint16 addr, uint8 bitIndex)
+uint16 CPU::setM8(uint16 addr, const uint8 bitIndex)
 {
     uint8 value = fetch8(addr);
     setR8(value, bitIndex);
@@ -1055,14 +1063,14 @@ uint16 CPU::setM8(uint16 addr, uint8 bitIndex)
     return 16;
 }
 
-uint16 CPU::resR8(uint8 &reg, uint8 bitIndex)
+uint16 CPU::resR8(uint8 &reg, const uint8 bitIndex)
 {
     (void)this;
     reg &= ~(1u << bitIndex);
     return 8;
 }
 
-uint16 CPU::resM8(uint16 addr, uint8 bitIndex)
+uint16 CPU::resM8(uint16 addr, const uint8 bitIndex)
 {
     uint8 value = fetch8(addr);
     resR8(value, bitIndex);

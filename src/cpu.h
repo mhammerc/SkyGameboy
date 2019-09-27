@@ -5,13 +5,21 @@
 #include <thread>
 #include <chrono>
 #include <optional>
-
-#include <dbg.h>
+#include <functional>
 
 #include "general.h"
 #include "virtual_memory.h"
 #include "lcd.h"
 
+/**
+ * CPU take care of:
+ * - decoding, fetching and executing instructions.
+ * - Managing and executing interrupts
+ * - Counting and performing cycle timings
+ *
+ * It works with memory and graphics. CPU actually tell to timers and graphics how
+ * much time pass so they can update and do their job on-time.
+ */
 class CPU
 {
 public:
@@ -19,25 +27,28 @@ public:
     {};
 
     // No copy
-    // Will be allowed later to allow snapshots
     CPU(const CPU&) = delete;
     CPU& operator=(const CPU&) = delete;
 
     /**
-     * - Fetch, decode and execute instruction currently pointed by PC.
-     * - Increment PC.
+     * - Fetch, decode and execute next instruction, or interrupt.
+     * - Perform timers update and graphic update.
+     * - This function can go very fast or wait for an extended period of time.
+     *
+     * This function is intended to be run in a loop.
      */
     void nextTick();
 
 private:
-    const long int cyclesPerSecond = 4194304;
-    const std::chrono::nanoseconds cycleTime = std::chrono::nanoseconds(static_cast<long int>(1e+9) / cyclesPerSecond);
-    const std::chrono::milliseconds minimumSleepTime {5};
+    VirtualMemory &memory;
+    LCD &lcd;
+
+    static const long int cyclesPerSecond = 4194304;
+    static constexpr std::chrono::nanoseconds cycleTime = std::chrono::nanoseconds(static_cast<long int>(1e+9) / cyclesPerSecond);
+    static constexpr std::chrono::milliseconds minimumSleepTime {5};
     std::chrono::nanoseconds overSleepDuration {0};
 
-    int32 cycle_count = 0;
-
-    void performCycleTiming();
+    void performCycleTiming(uint16 cycles);
 
     /**
      * IME - Interrupt Master Enable Flag
@@ -71,8 +82,8 @@ private:
     };
 
     /**
-     * Check if interrupts must be executed and execute them.
-     * @return Cycles consumed if interrupt happen else 0
+     * Check if an interrupt is ready to be serviced
+     * @return An optional interrupt.
      */
     [[nodiscard]] std::optional<RequestedInterrupt> checkInterrupts();
     /**
@@ -85,28 +96,21 @@ private:
      * Is CPU halted? (from instruction `halt`)
      */
     bool isHalt = false;
-
+    /**
+     * Only for HALT bug. Miss one PC increment.
+     */
+    bool missOnePCIncrement = false;
     /**
      * Halt CPU.
      */
-    void halt();
-
-    /**
-     * Are graphics (display) on?
-     */
-    bool graphicsOn = true;
-    /**
-     * Start or stop graphics.
-     * @param graphicsOn True to start graphics.
-     */
-    void setGraphicsOn(bool graphicsOn);
+    uint16 halt();
 
     /**
      * Decode then Execute the given opcode.
      * @param opcode opcode to execute
      * @return cycles consumed to fetch, decode and execute opcode
      */
-    uint16 decodeThenExecute(uint8 opcode);
+    [[nodiscard]] uint16 decodeThenExecute(uint8 opcode);
 
     /**
      * Fetch a byte from memory
@@ -142,28 +146,23 @@ private:
     // - `A` is a uint8 reference on the second byte of `AF` (little-endian)
     // - `F` is a uint8 reference on the first byte of `AF`
     uint16 AF = 0;
-    uint8 &A = reinterpret_cast<uint8&>(*(reinterpret_cast<uint8*>(&AF) + 1));
-    uint8 &F = reinterpret_cast<uint8&>(*(reinterpret_cast<uint8*>(&AF) + 0));
+    uint8 &A = std::ref(*(reinterpret_cast<uint8*>(&AF) + 1));
+    uint8 &F = std::ref(*(reinterpret_cast<uint8*>(&AF) + 0));
 
     uint16 BC = 0;
-    uint8 &B = reinterpret_cast<uint8&>(*(reinterpret_cast<uint8*>(&BC) + 1));
-    uint8 &C = reinterpret_cast<uint8&>(*(reinterpret_cast<uint8*>(&BC) + 0));
+    uint8 &B = std::ref(*(reinterpret_cast<uint8*>(&BC) + 1));
+    uint8 &C = std::ref(*(reinterpret_cast<uint8*>(&BC) + 0));
 
     uint16 DE = 0;
-    uint8 &D = reinterpret_cast<uint8&>(*(reinterpret_cast<uint8*>(&DE) + 1));
-    uint8 &E = reinterpret_cast<uint8&>(*(reinterpret_cast<uint8*>(&DE) + 0));
+    uint8 &D = std::ref(*(reinterpret_cast<uint8*>(&DE) + 1));
+    uint8 &E = std::ref(*(reinterpret_cast<uint8*>(&DE) + 0));
 
     uint16 HL = 0;
-    uint8 &H = reinterpret_cast<uint8&>(*(reinterpret_cast<uint8*>(&HL) + 1));
-    uint8 &L = reinterpret_cast<uint8&>(*(reinterpret_cast<uint8*>(&HL) + 0));
+    uint8 &H = std::ref(*(reinterpret_cast<uint8*>(&HL) + 1));
+    uint8 &L = std::ref(*(reinterpret_cast<uint8*>(&HL) + 0));
 
     uint16 SP = 0;
     uint16 PC = 0;
-
-    /**
-     * Only for HALT bug. Miss one PC increment.
-     */
-    bool missOnePCIncrement = false;
 
     struct
     {
@@ -190,22 +189,19 @@ private:
      * @return Return zero except for bit CARRY and HALF_CARRY set if needed.
      */
     template<typename T, bool addition = true>
-    uint8 carryAndHalfCarry(T a, T b);
+    [[nodiscard]] uint8 carryAndHalfCarry(T a, T b);
     template<>
-    uint8 carryAndHalfCarry<uint8, true>(uint8 a, uint8 b);
+    [[nodiscard]] uint8 carryAndHalfCarry<uint8, true>(uint8 a, uint8 b);
     template<>
-    uint8 carryAndHalfCarry<int8, true>(int8 a, int8 b);
+    [[nodiscard]] uint8 carryAndHalfCarry<int8, true>(int8 a, int8 b);
     template<>
-    uint8 carryAndHalfCarry<uint16, true>(uint16 a, uint16 b);
+    [[nodiscard]] uint8 carryAndHalfCarry<uint16, true>(uint16 a, uint16 b);
     template<>
-    uint8 carryAndHalfCarry<int16, true>(int16 a, int16 b);
+    [[maybe_unused]] [[nodiscard]] uint8 carryAndHalfCarry<int16, true>(int16 a, int16 b);
     template<>
-    uint8 carryAndHalfCarry<uint8, false>(uint8 a, uint8 b);
+    [[nodiscard]] uint8 carryAndHalfCarry<uint8, false>(uint8 a, uint8 b);
     template<>
-    uint8 carryAndHalfCarry<uint16, false>(uint16 a, uint16 b);
-
-    VirtualMemory &memory;
-    LCD &lcd;
+    [[nodiscard]] uint8 carryAndHalfCarry<uint16, false>(uint16 a, uint16 b);
 
     // Here live all processor instructions.
     // They all return cycle count consumed.
@@ -220,10 +216,11 @@ private:
     // Suffix `addr16` mean 16 bit address is read from PC (instead addr read from register)
     //
     // When an address is 8bit, add 0xFF00 to that address.
-
     uint16 nop();
+
     uint16 push(uint16 reg);
     uint16 pop(uint16 &reg);
+
     uint16 DAA();
     uint16 CPL();
     uint16 SCF();
@@ -303,6 +300,8 @@ private:
     uint16 decR16(uint16 &reg);
 
     // All 8bit rotate, shift and bit instructions
+    uint16 prefixCB();
+
     uint16 rlca();
     uint16 rrca();
     uint16 rla();
@@ -324,18 +323,15 @@ private:
     uint16 srlR8(uint8 &reg);
     uint16 srlM8(uint16 addr);
 
-    uint16 prefixCB();
-
     uint16 swapR8(uint8 &reg);
     uint16 swapM8(uint16 addr);
 
-    uint16 bitR8(uint8 reg, uint8 bitIndex);
-    uint16 bitM8(uint16 addr, uint8 bitIndex);
-    uint16 setR8(uint8 &reg, uint8 bitIndex);
-    uint16 setM8(uint16 addr, uint8 bitIndex);
-    uint16 resR8(uint8 &reg, uint8 bitIndex);
-    uint16 resM8(uint16 addr, uint8 bitIndex);
+    uint16 bitR8(uint8 reg, const uint8 bitIndex);
+    uint16 bitM8(uint16 addr, const uint8 bitIndex);
+    uint16 setR8(uint8 &reg, const uint8 bitIndex);
+    uint16 setM8(uint16 addr, const uint8 bitIndex);
+    uint16 resR8(uint8 &reg, const uint8 bitIndex);
+    uint16 resM8(uint16 addr, const uint8 bitIndex);
 };
-
 
 #endif //FRACTAL_CPU_H

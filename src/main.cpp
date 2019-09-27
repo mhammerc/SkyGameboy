@@ -28,6 +28,5 @@ int main(int argc, char **argv)
     Motherboard motherboard(biosROM, gameROM);
     motherboard.run();
 
-
     return 0;
 }

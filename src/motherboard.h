@@ -10,6 +10,10 @@
 /**
  * This class represent the Gameboy "motherboard": it hold CPU, and all
  * components required to run the software.
+ *
+ * Components need other components to work. They are passed by reference.
+ * As soon as Motherboard destruct, all components will destruct. Passing reference of component
+ * to components internal of Motherboard is no danger.
  */
 class Motherboard
 {
