@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <memory>
 #include <iostream>
+#include <algorithm>
 
 #include "general.h"
 #include "files/file_reader_stack.h"
@@ -24,7 +25,6 @@ public:
     {}
 
     // No copy
-    // Will be allowed later to allow snapshots
     VirtualMemory& operator=(const VirtualMemory&) = delete;
 
     [[nodiscard]] uint8 read8(uint16 address);
@@ -39,6 +39,15 @@ private:
     static const size_t bootloaderSize = 256;
     const FileReaderStack<bootloaderSize> biosRom;
     const FileReaderHeap gameROM;
+
+    /**
+     * If different than 0, bios rom is disabled.
+     * Read at 0xFF50 return the value.
+     * Write of 1 at 0xFF50 write the value.
+     * Other writes are rejected.
+     */
+    uint8 biosRomDisabled = 0;
+
     // Always MBC1 for now
     uint8 currentROMBank = 1;
     struct
@@ -91,7 +100,7 @@ public:
         const uint8 TIMA = 1u << 2u;
         const uint8 serial = 1u << 3u;
         const uint8 joypad = 1u << 4u;
-        const uint8 alwaysSet = 1u << 5u | 1u << 6u | 1u << 7u;
+        const uint8 alwaysHigh = 1u << 5u | 1u << 6u | 1u << 7u;
     } interruptBits;
 
     struct
@@ -104,7 +113,6 @@ public:
     } interruptAddress;
 
 private:
-
     /**
      * Hold clock count.
      * Read at 0xFF04 return the upper 8 bits of this counter.
@@ -146,18 +154,10 @@ private:
     {
         const uint8 freq = 1u << 0u | 1u << 1u;
         const uint8 enabled = 1u << 2u;
-        const uint8 alwaysZero = 1u << 3u | 1u << 4u | 1u << 5u | 1u << 6u | 1u << 7u;
+        const uint8 alwaysHigh = 1u << 3u | 1u << 4u | 1u << 5u | 1u << 6u | 1u << 7u;
     } TACBits;
 
     void updateTIMATimer(uint16 oldDividerRegister, uint16 amountAdded);
-
-    /**
-     * If different than 0, bios rom is disabled.
-     * Read at 0xFF50 return the value.
-     * Write of 1 at 0xFF50 write the value.
-     * Other writes are rejected.
-     */
-    uint8 biosRomDisabled = 0;
 
     /**
      * LCD Control.

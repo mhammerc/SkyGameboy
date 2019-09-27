@@ -8,7 +8,7 @@
 #include "../general.h"
 
 /**
- * Open and read a file, making it available to be read.
+ * Open and read an unknown-size or big-size file, making it available to be read.
  */
 class FileReaderHeap
 {

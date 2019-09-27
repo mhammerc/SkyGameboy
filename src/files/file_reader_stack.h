@@ -7,9 +7,11 @@
 #include "../general.h"
 
 /**
+ * Load a known-size file which fit on stack.
+ *
  * Create `size` bytes buffer, and fill it with file data located at `path`.
  * If file is larger than `size`, remaining bytes will be dropped.
- * If file is smaller than `size`, remaining bytes will are 0x0.
+ * If file is smaller than `size`, remaining bytes will be 0x0.
  *
  * This class is a generic which allow buffer to live on stack, easily.
  *
