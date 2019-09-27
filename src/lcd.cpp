@@ -1,7 +1,7 @@
 #include "lcd.h"
 #include "virtual_memory.h"
 
-LCD::LCD(VirtualMemory *memory) : memory(memory)
+LCD::LCD(VirtualMemory &memory) : memory(memory)
 {
 
 }
@@ -14,28 +14,28 @@ void LCD::cycles(uint16 elapsedCycles)
     if (currentMode == Mode::Mode0 && currentElapsedCycles >= 204)
     {
         currentElapsedCycles = 0;
-        if (memory->LY >= 143)
+        if (memory.LY >= 143)
         {
-            memory->STAT = (memory->STAT & ~memory->STATBits.currentMode) | 1u;
+            memory.STAT = (memory.STAT & ~memory.STATBits.currentMode) | 1u;
             currentMode = Mode::Mode1;
             display.pollEvents();
             display.print(buffer);
 
-            if (memory->STAT & memory->STATBits.mode1Enable)
+            if (memory.STAT & memory.STATBits.mode1Enable)
             {
-                memory->interruptRequest |= memory->interruptBits.lcdStat;
+                memory.interruptRequest |= memory.interruptBits.lcdStat;
             }
-            memory->interruptRequest |= memory->interruptBits.verticalBlank;
+            memory.interruptRequest |= memory.interruptBits.verticalBlank;
         }
         else
         {
-            memory->STAT = (memory->STAT & ~memory->STATBits.currentMode) | 2u;
-            ++memory->LY;
+            memory.STAT = (memory.STAT & ~memory.STATBits.currentMode) | 2u;
+            ++memory.LY;
             currentMode = Mode::Mode2;
 
-            if (memory->STAT & memory->STATBits.mode2Enable)
+            if (memory.STAT & memory.STATBits.mode2Enable)
             {
-                memory->interruptRequest |= memory->interruptBits.lcdStat;
+                memory.interruptRequest |= memory.interruptBits.lcdStat;
             }
         }
     }
@@ -43,34 +43,34 @@ void LCD::cycles(uint16 elapsedCycles)
     {
         currentMode = Mode::Mode3;
         currentElapsedCycles = 0;
-        memory->STAT = (memory->STAT & ~memory->STATBits.currentMode) | 3u;
+        memory.STAT = (memory.STAT & ~memory.STATBits.currentMode) | 3u;
     }
     else if (currentMode == Mode::Mode3 && currentElapsedCycles >= 172)
     {
         drawLine();
         currentMode = Mode::Mode0;
         currentElapsedCycles = 0;
-        memory->STAT = (memory->STAT & ~memory->STATBits.currentMode) | 0u;
+        memory.STAT = (memory.STAT & ~memory.STATBits.currentMode) | 0u;
 
-        if (memory->STAT & memory->STATBits.mode0Enable)
+        if (memory.STAT & memory.STATBits.mode0Enable)
         {
-            memory->interruptRequest |= memory->interruptBits.lcdStat;
+            memory.interruptRequest |= memory.interruptBits.lcdStat;
         }
     }
     else if (currentMode == Mode::Mode1 && currentElapsedCycles >= 456)
     {
         currentElapsedCycles = 0;
-        ++memory->LY;
+        ++memory.LY;
 
-        if (memory->LY > 153)
+        if (memory.LY > 153)
         {
             currentMode = Mode::Mode2;
-            memory->STAT = (memory->STAT & ~memory->STATBits.currentMode) | 2u;
-            memory->LY = 0;
+            memory.STAT = (memory.STAT & ~memory.STATBits.currentMode) | 2u;
+            memory.LY = 0;
 
-            if (memory->STAT & memory->STATBits.mode2Enable)
+            if (memory.STAT & memory.STATBits.mode2Enable)
             {
-                memory->interruptRequest |= memory->interruptBits.lcdStat;
+                memory.interruptRequest |= memory.interruptBits.lcdStat;
             }
         }
     }
@@ -90,19 +90,19 @@ void LCD::drawLine()
 //        const uint8 y = 8;
 //    } tileSize;
 
-    const uint16 backgroundTilemapAddr = memory->lcdControl & memory->lcdControlBits.backgroundTilemap ? 0x9C00 : 0x9800;
-    const uint16 tilesetAddr = memory->lcdControl & memory->lcdControlBits.tileset ? 0x8000 : 0x8800;
+    const uint16 backgroundTilemapAddr = memory.lcdControl & memory.lcdControlBits.backgroundTilemap ? 0x9C00 : 0x9800;
+    const uint16 tilesetAddr = memory.lcdControl & memory.lcdControlBits.tileset ? 0x8000 : 0x8800;
     const bool tilemapSigned = tilesetAddr == 0x8800;
-    const uint8 scrollX = memory->scrollX;
-    const uint8 scrollY = memory->scrollY;
-    const size_t screenY = memory->LY;
+    const uint8 scrollX = memory.scrollX;
+    const uint8 scrollY = memory.scrollY;
+    const size_t screenY = memory.LY;
     const uint8 bgY = (screenY + scrollY);// % HEIGHT;
 
     for (size_t screenX = 0; screenX < WIDTH; ++screenX)
     {
         const uint8 bgX = (scrollX + screenX);// % WIDTH;
 
-        if (memory->lcdControl & memory->lcdControlBits.backgroundEnable)
+        if (memory.lcdControl & memory.lcdControlBits.backgroundEnable)
         {
             // From current screen (X,Y), get address of current tilemap
             const uint16 currentTilemapIndex = (bgX / 8u) + ((bgY / 8u) * 32);
@@ -111,9 +111,9 @@ void LCD::drawLine()
             // Get current id of the tile being drawn
             int16 currentTilesetId = 0;
             if (tilemapSigned)
-                currentTilesetId = static_cast<int8>(memory->read8(currentTilemapAddr));
+                currentTilesetId = static_cast<int8>(memory.read8(currentTilemapAddr));
             else
-                currentTilesetId = memory->read8(currentTilemapAddr);
+                currentTilesetId = memory.read8(currentTilemapAddr);
 
             // Get address to read that tile
             const uint16 currentTilesetAddr = (currentTilesetId * 16) + tilesetAddr;
@@ -123,8 +123,8 @@ void LCD::drawLine()
             const uint8 tilePosY = bgY % 8u * 2; // says which bytes (two bytes per line) to read
 
             // address of both bytes for the current line of the tile
-            const uint8 tile0 = memory->read8(currentTilesetAddr + tilePosY + 0);
-            const uint8 tile1 = memory->read8(currentTilesetAddr + tilePosY + 1);
+            const uint8 tile0 = memory.read8(currentTilesetAddr + tilePosY + 0);
+            const uint8 tile1 = memory.read8(currentTilesetAddr + tilePosY + 1);
 
             // actual DMG color of the pixel [0;3]
             const uint8 color = ((tile0 >> tilePosX) & 1u) + (((tile1 >> tilePosX) & 1u) << 1);

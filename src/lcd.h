@@ -36,7 +36,7 @@
 class LCD
 {
 public:
-    explicit LCD(VirtualMemory *memory);
+    explicit LCD(VirtualMemory &memory);
 
     /**
      * Give a new amount of elapsed cycles.
@@ -55,8 +55,7 @@ private:
     static const constexpr size_t WIDTH = 160;
     static const constexpr size_t HEIGHT = 144;
 
-    // it is owned by CPU
-    VirtualMemory * const memory;
+    VirtualMemory &memory;
 public:
     Display display;
 private:

@@ -48,8 +48,8 @@ void CPU::nextTick()
 
     F &= ~FFlags.alwaysLow;
     cycle_count += cycles;
-    memory->incrementDividerRegister(cycles);
-    lcd->cycles(cycles);
+    memory.incrementDividerRegister(cycles);
+    lcd.cycles(cycles);
     performCycleTiming();
 }
 
@@ -77,32 +77,32 @@ void CPU::performCycleTiming()
 
 std::optional<CPU::RequestedInterrupt> CPU::checkInterrupts()
 {
-    const uint8 interruptEnable = memory->read8(0xFFFF);
-    const uint8 interruptRequest = memory->read8(0xFF0F);
+    const uint8 interruptEnable = memory.read8(0xFFFF);
+    const uint8 interruptRequest = memory.read8(0xFF0F);
 
-    if (interruptEnable & interruptRequest & memory->interruptBits.verticalBlank)
+    if (interruptEnable & interruptRequest & memory.interruptBits.verticalBlank)
     {
-        return RequestedInterrupt {memory->interruptAddress.verticalBlank, memory->interruptBits.verticalBlank};
+        return RequestedInterrupt {memory.interruptAddress.verticalBlank, memory.interruptBits.verticalBlank};
     }
 
-    if (interruptEnable & interruptRequest & memory->interruptBits.lcdStat)
+    if (interruptEnable & interruptRequest & memory.interruptBits.lcdStat)
     {
-        return RequestedInterrupt {memory->interruptAddress.lcdStat, memory->interruptBits.lcdStat};
+        return RequestedInterrupt {memory.interruptAddress.lcdStat, memory.interruptBits.lcdStat};
     }
 
-    if (interruptEnable & interruptRequest & memory->interruptBits.TIMA)
+    if (interruptEnable & interruptRequest & memory.interruptBits.TIMA)
     {
-        return RequestedInterrupt {memory->interruptAddress.TIMA, memory->interruptBits.TIMA};
+        return RequestedInterrupt {memory.interruptAddress.TIMA, memory.interruptBits.TIMA};
     }
 
-    if (interruptEnable & interruptRequest & memory->interruptBits.serial)
+    if (interruptEnable & interruptRequest & memory.interruptBits.serial)
     {
-        return RequestedInterrupt {memory->interruptAddress.serial, memory->interruptBits.serial};
+        return RequestedInterrupt {memory.interruptAddress.serial, memory.interruptBits.serial};
     }
 
-    if (interruptEnable & interruptRequest & memory->interruptBits.joypad)
+    if (interruptEnable & interruptRequest & memory.interruptBits.joypad)
     {
-        return RequestedInterrupt {memory->interruptAddress.joypad, memory->interruptBits.joypad};
+        return RequestedInterrupt {memory.interruptAddress.joypad, memory.interruptBits.joypad};
     }
 
     return std::nullopt;
@@ -111,9 +111,9 @@ std::optional<CPU::RequestedInterrupt> CPU::checkInterrupts()
 uint16 CPU::callInterrupt(RequestedInterrupt requestedInterrupt)
 {
     // Disable interrupt request from IF flag
-    uint8 interruptRequest = memory->read8(0xFF0F);
+    uint8 interruptRequest = memory.read8(0xFF0F);
     interruptRequest &= ~requestedInterrupt.bit;
-    memory->write8(0xFF0F, interruptRequest);
+    memory.write8(0xFF0F, interruptRequest);
 
     setIME(false);
 
@@ -139,23 +139,23 @@ void CPU::setGraphicsOn(bool graphicsOn)
 
 uint8 CPU::fetch8(const uint16 addr)
 {
-    return memory->read8(addr);
+    return memory.read8(addr);
 }
 
 uint16 CPU::fetch16(const uint16 addr)
 {
-    const uint8 b1 = memory->read8(addr + 0);
-    const uint8 b2 = memory->read8(addr + 1);
+    const uint8 b1 = memory.read8(addr + 0);
+    const uint8 b2 = memory.read8(addr + 1);
     return bytesToWordLE(b1, b2);
 }
 
 void CPU::write8(uint16 addr, uint8 value)
 {
-    memory->write8(addr, value);
+    memory.write8(addr, value);
 }
 
 void CPU::write16(uint16 addr, uint16 value)
 {
-    memory->write8(addr + 0, value & 0xFFu);
-    memory->write8(addr + 1, (value >> 8u) & 0xFFu);
+    memory.write8(addr + 0, value & 0xFFu);
+    memory.write8(addr + 1, (value >> 8u) & 0xFFu);
 }

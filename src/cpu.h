@@ -15,10 +15,8 @@
 class CPU
 {
 public:
-    explicit CPU(std::unique_ptr<VirtualMemory> &&memory) : memory(std::move(memory))
-    {
-        lcd = std::make_unique<LCD>(this->memory.get());
-    };
+    explicit CPU(VirtualMemory &memory, LCD &lcd) : memory(memory), lcd(lcd)
+    {};
 
     // No copy
     // Will be allowed later to allow snapshots
@@ -206,8 +204,8 @@ private:
     template<>
     uint8 carryAndHalfCarry<uint16, false>(uint16 a, uint16 b);
 
-    std::unique_ptr<VirtualMemory> memory;
-    std::unique_ptr<LCD> lcd;
+    VirtualMemory &memory;
+    LCD &lcd;
 
     // Here live all processor instructions.
     // They all return cycle count consumed.
