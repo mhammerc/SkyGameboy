@@ -7,9 +7,9 @@
 #include <optional>
 #include <functional>
 
-#include "general.h"
-#include "virtual_memory.h"
-#include "lcd.h"
+#include "../../general.h"
+#include "../virtual_memory.h"
+#include "../lcd.h"
 
 /**
  * CPU take care of:

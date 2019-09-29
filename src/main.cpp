@@ -2,7 +2,10 @@
 #include <cstdlib>
 #include <memory>
 
-#include "motherboard.h"
+#include "backend/motherboard.h"
+
+// Include your frontends implementations
+#include "frontend/display.h"
 
 static const char *usage =
 R"(Usage: skygameboy <game ROM>
@@ -25,7 +28,11 @@ int main(int argc, char **argv)
     const std::string gameROM = parseCLI(argc, argv);
     const std::string biosROM = "./roms/dmg_boot.bin";
 
-    Motherboard motherboard(biosROM, gameROM);
+    // Initialize here all your frontends
+    // They must have same lifetime as the application
+    Display display;
+
+    Motherboard motherboard(biosROM, gameROM, display);
     motherboard.run();
 
     return 0;

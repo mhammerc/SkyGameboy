@@ -6,9 +6,9 @@
 #include <iostream>
 #include <algorithm>
 
-#include "general.h"
-#include "files/file_reader_stack.h"
-#include "files/file_reader_heap.h"
+#include "../general.h"
+#include "../files/file_reader_stack.h"
+#include "../files/file_reader_heap.h"
 
 /**
  * It represent the MMU but also internal RAM & graphics RAM.

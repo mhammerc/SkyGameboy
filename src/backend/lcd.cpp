@@ -1,7 +1,7 @@
 #include "lcd.h"
 #include "virtual_memory.h"
 
-LCD::LCD(VirtualMemory &memory) : memory(memory)
+LCD::LCD(VirtualMemory &memory, IDisplay &display) : memory(memory), display(display)
 {
 
 }
@@ -18,8 +18,7 @@ void LCD::cycles(uint16 elapsedCycles)
         {
             memory.STAT = (memory.STAT & ~memory.STATBits.currentMode) | 1u;
             currentMode = Mode::Mode1;
-            display.pollEvents();
-            display.print(buffer);
+            display.newFrameIsReady(buffer);
 
             if (memory.STAT & memory.STATBits.mode1Enable)
             {
@@ -130,13 +129,12 @@ void LCD::drawLine()
             const uint8 color = ((tile0 >> tilePosX) & 1u) + (((tile1 >> tilePosX) & 1u) << 1);
 
             // Get the SFML color
-            std::array<uint8, 4> SFMLColor = colors[color];
+            std::array<uint8, 3> SFMLColor = colors[color];
 
             // print it in the final buffer
-            buffer[(screenX + (screenY * WIDTH)) * 4 + 0] = SFMLColor[0];
-            buffer[(screenX + (screenY * WIDTH)) * 4 + 1] = SFMLColor[1];
-            buffer[(screenX + (screenY * WIDTH)) * 4 + 2] = SFMLColor[2];
-            buffer[(screenX + (screenY * WIDTH)) * 4 + 3] = SFMLColor[3];
+            buffer[(screenX + (screenY * WIDTH)) * 3 + 0] = SFMLColor[0];
+            buffer[(screenX + (screenY * WIDTH)) * 3 + 1] = SFMLColor[1];
+            buffer[(screenX + (screenY * WIDTH)) * 3 + 2] = SFMLColor[2];
         }
     }
 }

@@ -1,5 +1,5 @@
 #include "cpu.h"
-#include "virtual_memory.h"
+#include "../virtual_memory.h"
 
 void CPU::nextTick()
 {

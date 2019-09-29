@@ -3,7 +3,8 @@
 
 #include <string>
 
-#include "cpu.h"
+#include "../frontend/interfaces/i_display.h"
+#include "cpu/cpu.h"
 #include "virtual_memory.h"
 #include "lcd.h"
 
@@ -18,8 +19,8 @@
 class Motherboard
 {
 public:
-    explicit Motherboard(const std::string &biosRomPath, const std::string &gameRomPath):
-    memory(biosRomPath, gameRomPath), lcd(memory), cpu(memory, lcd)
+    explicit Motherboard(const std::string &biosRomPath, const std::string &gameRomPath, IDisplay &display):
+    memory(biosRomPath, gameRomPath), lcd(memory, display), cpu(memory, lcd)
     {
 
     };

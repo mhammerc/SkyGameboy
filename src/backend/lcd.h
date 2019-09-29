@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "virtual_memory.h"
-#include "display.h"
+#include "../frontend/interfaces/i_display.h"
 
 /**
  * Imagine LCD is a standalone chip in the Gameboy, being able to access
@@ -36,19 +36,19 @@
 class LCD
 {
 public:
-    explicit LCD(VirtualMemory &memory);
+    explicit LCD(VirtualMemory &memory, IDisplay &display);
 
     /**
      * Give a new amount of elapsed cycles.
      */
     void cycles(uint16 elapsedCycles);
 
-    static const constexpr std::array<std::array<uint8, 4>, 4> colors =
+    static const constexpr std::array<std::array<uint8, 3>, 4> colors =
     {{
-        {{255, 255, 255, 255}},
-        {{192, 192, 192, 255}},
-        {{96, 96, 96, 255}},
-        {{0, 0, 0, 255}}
+        {{255, 255, 255}},
+        {{192, 192, 192}},
+        {{96, 96, 96}},
+        {{0, 0, 0}}
     }};
 
 private:
@@ -57,7 +57,7 @@ private:
 
     VirtualMemory &memory;
 public:
-    Display display;
+    IDisplay &display;
 private:
 
     enum class Mode
@@ -72,7 +72,7 @@ private:
     // Cycles elapsed for current mode
     uint16 currentElapsedCycles = 0;
 
-    std::vector<uint8> buffer = std::vector<uint8>(WIDTH * HEIGHT * 4, 0);
+    std::vector<uint8> buffer = std::vector<uint8>(WIDTH * HEIGHT * 3, 0);
 
     void drawLine();
 };

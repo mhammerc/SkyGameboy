@@ -12,6 +12,12 @@ typedef short int16;
 typedef unsigned int uint32;
 typedef int int32;
 
+namespace EmulatorConstants
+{
+    constexpr size_t SCREEN_WIDTH = 160;
+    constexpr size_t SCREEN_HEIGHT = 144;
+}
+
 /**
  * Parse two independant bytes to a word (16bit value) using little endian.
  *
@@ -19,7 +25,7 @@ typedef int int32;
  * @param b2 byte 2
  * @return 16 bit value as 0x[b2][b1]
  */
-[[maybe_unused]] static uint16 bytesToWordLE(const uint8 b1, const uint8 b2)
+[[nodiscard]] static uint16 bytesToWordLE(const uint8 b1, const uint8 b2)
 {
     return static_cast<uint16>(b1) + (static_cast<uint16>(b2) << 8u);
 }
