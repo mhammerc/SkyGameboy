@@ -319,7 +319,7 @@ void VirtualMemory::incrementDividerRegister(uint8 amount)
     // To make this happen, update TIMA with a maximum of 15 cycles.
     // 15 cycles is the lowest frequency of TIMA.
 
-    static const uint8 threshold = 15;
+    static const uint8 threshold = 10;
     uint8 subtractedAmount = 0;
     while (amount != 0)
     {
