@@ -4,9 +4,11 @@
 #include <string>
 
 #include "../frontend/interfaces/i_display.h"
+#include "../frontend/interfaces/i_input.h"
 #include "cpu/cpu.h"
 #include "virtual_memory.h"
 #include "lcd.h"
+#include "input_manager.h"
 
 /**
  * This class represent the Gameboy "motherboard": it hold CPU, and all
@@ -19,13 +21,15 @@
 class Motherboard
 {
 public:
-    explicit Motherboard(const std::string &biosRomPath, const std::string &gameRomPath, IDisplay &display):
-    memory(biosRomPath, gameRomPath), lcd(memory, display), cpu(memory, lcd)
-    {
-
-    };
+    explicit Motherboard(const std::string &biosRomPath, const std::string &gameRomPath, IDisplay &display, IInput &input):
+    memory(biosRomPath, gameRomPath),
+    inputManager(memory, input),
+    lcd(memory, display),
+    cpu(memory, inputManager, lcd)
+    {};
 
     VirtualMemory memory;
+    InputManager inputManager;
     LCD lcd;
     CPU cpu;
 

@@ -32,7 +32,7 @@ int main(int argc, char **argv)
     // They must have same lifetime as the application
     Display display;
 
-    Motherboard motherboard(biosROM, gameROM, display);
+    Motherboard motherboard(biosROM, gameROM, display, display);
     motherboard.run();
 
     return 0;

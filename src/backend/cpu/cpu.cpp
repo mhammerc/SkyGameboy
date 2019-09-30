@@ -50,6 +50,7 @@ void CPU::nextTick()
     memory.incrementDividerRegister(cycles);
     lcd.cycles(cycles);
     performCycleTiming(cycles);
+    input.updateInputStatus();
 }
 
 void CPU::performCycleTiming(uint16 cycles)
@@ -88,9 +89,9 @@ std::optional<CPU::RequestedInterrupt> CPU::checkInterrupts()
         return RequestedInterrupt {memory.interruptAddress.verticalBlank, memory.interruptBits.verticalBlank};
     }
 
-    if (interruptEnable & interruptRequest & memory.interruptBits.lcdStat)
+    if (interruptEnable & interruptRequest & memory.interruptBits.STAT)
     {
-        return RequestedInterrupt {memory.interruptAddress.lcdStat, memory.interruptBits.lcdStat};
+        return RequestedInterrupt {memory.interruptAddress.lcdStat, memory.interruptBits.STAT};
     }
 
     if (interruptEnable & interruptRequest & memory.interruptBits.TIMA)

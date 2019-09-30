@@ -31,7 +31,7 @@ uint8 VirtualMemory::read8(const uint16 address)
         // Joypad buttons
         if (address == 0xFF00)
         {
-            return 0;
+            return joypadButtons | joypadButtonsBits.alwaysHigh;
         }
         // serial port
         if (address == 0xFF01)
@@ -186,6 +186,12 @@ void VirtualMemory::write8(const uint16 address, uint8 value)
 
     // I/O
     {
+        if (address == 0xFF00)
+        {
+            // only select bits are writable
+            joypadButtons &= ~joypadButtonsBits.selectBits;
+            joypadButtons |= value & joypadButtonsBits.selectBits;
+        }
         // serial port
         if (address == 0xFF01)
         {
@@ -203,7 +209,6 @@ void VirtualMemory::write8(const uint16 address, uint8 value)
         if (address == 0xFF04)
         {
             dividerRegister = 0;
-            return;
         }
         if (address == 0xFF05)
         {
@@ -236,28 +241,23 @@ void VirtualMemory::write8(const uint16 address, uint8 value)
         if (address >= 0x8000 && address < 0x9FFF)
         {
             videoRAM[address - 0x8000] = value;
-            return;
         }
         if (address >= 0xC000 && address < 0xE000)
         {
             workingRAM[address - 0xC000] = value;
-            return;
         }
         // echo working RAM
         if (address >= 0xE000 && address < 0xFE00)
         {
             workingRAM[address - 0xE000] = value;
-            return;
         }
         if (address >= 0xFE00 && address < 0xFEA0)
         {
             oamRAM[address - 0xFE00] = value;
-            return;
         }
         if (address >= 0xFF80 && address < 0xFFFE)
         {
             stackRAM[address - 0xFF80] = value;
-            return;
         }
     }
 

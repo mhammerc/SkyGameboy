@@ -10,10 +10,11 @@
 #include "../../general.h"
 #include "../virtual_memory.h"
 #include "../lcd.h"
+#include "../input_manager.h"
 
 /**
  * CPU take care of:
- * - decoding, fetching and executing instructions.
+ * - Decoding, fetching and executing instructions.
  * - Managing and executing interrupts
  * - Counting and performing cycle timings
  *
@@ -23,7 +24,7 @@
 class CPU
 {
 public:
-    explicit CPU(VirtualMemory &memory, LCD &lcd) : memory(memory), lcd(lcd)
+    explicit CPU(VirtualMemory &memory, InputManager &input, LCD &lcd) : memory(memory), input(input), lcd(lcd)
     {};
 
     // No copy
@@ -41,6 +42,7 @@ public:
 
 private:
     VirtualMemory &memory;
+    InputManager &input;
     LCD &lcd;
 
     static const long int cyclesPerSecond = 4194304;

@@ -9,10 +9,11 @@
 
 #include "../general.h"
 #include "interfaces/i_display.h"
+#include "interfaces/i_input.h"
 
 using namespace EmulatorConstants;
 
-class Display : public IDisplay
+class Display : public IDisplay, public IInput
 {
 public:
     Display() : window(sf::VideoMode(windowSize.x * 4, windowSize.y * 4), "DMG")
@@ -54,6 +55,45 @@ private:
         {
             if (event.type == sf::Event::Closed)
                 window.close();
+        }
+
+        checkForKeyboard();
+    }
+
+    void checkForKeyboard()
+    {
+        inputStatus = InputStatus{};
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+        {
+            inputStatus.up = true;
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+        {
+            inputStatus.down = true;
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+        {
+            inputStatus.left = true;
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+        {
+            inputStatus.right = true;
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::J))
+        {
+            inputStatus.buttonA = true;
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::K))
+        {
+            inputStatus.buttonB = true;
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter))
+        {
+            inputStatus.start = true;
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Quote))
+        {
+            inputStatus.select = true;
         }
     }
 };

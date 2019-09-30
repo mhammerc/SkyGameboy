@@ -9,8 +9,7 @@
 
 /**
  * Imagine LCD is a standalone chip in the Gameboy, being able to access
- * memory (which explain VirtualMemory pointer) and does it work autonomously
- * in concordance with CPU cycles.
+ * memory (which explain VirtualMemory reference) and does its work autonomously.
  *
  * It is therefore a standalone running class which is updated according to
  * elapsed cycles.
@@ -62,12 +61,12 @@ private:
 
     enum class Mode
     {
-        Mode0 = 0, // hblank
-        Mode1, // VBLANK
-        Mode2, // OAM read
-        Mode3 // OAM and VRAM read
+        HBLANK, // Mode 0
+        VBLANK, // Mode 1
+        OAM, // Mode 2
+        Transfer // Mode 3
     };
-    Mode currentMode = Mode::Mode0;
+    Mode currentMode = Mode::HBLANK;
 
     // Cycles elapsed for current mode
     uint16 currentElapsedCycles = 0;
@@ -75,6 +74,12 @@ private:
     std::vector<uint8> buffer = std::vector<uint8>(WIDTH * HEIGHT * 3, 0);
 
     void drawLine();
+    void incrementLY();
+    void setLY(uint8 value);
+    void updateLY();
+
+    bool STATIRQSignal = false;
+    void updateSTATIRQ();
 };
 
 

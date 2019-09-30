@@ -33,8 +33,8 @@ public:
     void incrementDividerRegister(uint8 amount);
 
 private:
-    // Todo: remove
     friend class LCD;
+    friend class InputManager;
 
     static const size_t bootloaderSize = 256;
     const FileReaderStack<bootloaderSize> biosRom;
@@ -50,7 +50,7 @@ private:
 
     // Always MBC1 for now
     uint8 currentROMBank = 1;
-    struct
+    const struct
     {
         const uint8 lowerBits = 1u << 0u | 1u << 1u | 1u << 2u | 1u << 3u | 1u << 4u;
         const uint8 upperBits = 1u << 5u | 1u << 6u;
@@ -92,18 +92,40 @@ private:
      */
     uint8 interruptEnable = 0;
 
+    /**
+     * Joypad input/output
+     * Read at 0xFF00 return these first 6 bits. Remaining bits are high.
+     * Write at 0xFF00 set the value. Remaining bits are high.
+     */
+    uint8 joypadButtons = 0xFF;
+
+    const struct
+    {
+        const uint8 rightOrA = 1u << 0u;
+        const uint8 leftOrB = 1u << 1u;
+        const uint8 upOrSelect = 1u << 2u;
+        const uint8 downOrStart = 1u << 3u;
+        const uint8 inputBits = rightOrA | leftOrB | upOrSelect | downOrStart;
+
+        const uint8 selectDirection = 1u << 4u;
+        const uint8 selectButton = 1u << 5u;
+        const uint8 selectBits = selectDirection | selectButton;
+
+        const uint8 alwaysHigh = 1u << 6u | 1u << 7u;
+    } joypadButtonsBits;
+
 public:
-    struct
+    const struct
     {
         const uint8 verticalBlank = 1u << 0u;
-        const uint8 lcdStat = 1u << 1u;
+        const uint8 STAT = 1u << 1u;
         const uint8 TIMA = 1u << 2u;
         const uint8 serial = 1u << 3u;
         const uint8 joypad = 1u << 4u;
         const uint8 alwaysHigh = 1u << 5u | 1u << 6u | 1u << 7u;
     } interruptBits;
 
-    struct
+    const struct
     {
         const uint16 verticalBlank = 0x0040u;
         const uint16 lcdStat = 0x0048u;
@@ -150,7 +172,7 @@ private:
      *     - Bit [3..7]: ignored
      */
     uint8 TAC = 0;
-    struct
+    const struct
     {
         const uint8 freq = 1u << 0u | 1u << 1u;
         const uint8 enabled = 1u << 2u;
@@ -175,7 +197,7 @@ private:
      */
     uint8 lcdControl = 0;
 
-    struct
+    const struct
     {
         const uint8 backgroundEnable = 1u << 0u;
         const uint8 spritesEnable = 1u << 1u;
@@ -203,15 +225,20 @@ private:
      */
     uint8 STAT = 0;
 
-    struct
+    const struct
     {
-        uint8 currentMode = 1u << 0u | 1u << 1u;
-        uint8 LYCEquality = 1u << 2u;
-        uint8 mode0Enable = 1u << 3u;
-        uint8 mode1Enable = 1u << 4u;
-        uint8 mode2Enable = 1u << 5u;
-        uint8 LYCInterruptEnable = 1u << 6u;
-        uint8 alwaysHigh = 1u << 7u;
+        const uint8 currentMode = 1u << 0u | 1u << 1u;
+        const uint8 currentModeHBlank = 0;
+        const uint8 currentModeVBlank = 1;
+        const uint8 currentModeOAM = 2;
+        const uint8 currentModeDataTransfer = 3;
+
+        const uint8 LYCEquality = 1u << 2u;
+        const uint8 HBlankInterruptEnable = 1u << 3u;
+        const uint8 VBlankInterruptEnable = 1u << 4u;
+        const uint8 OAMInterruptEnable = 1u << 5u;
+        const uint8 LYCInterruptEnable = 1u << 6u;
+        const uint8 alwaysHigh = 1u << 7u;
     } STATBits;
 
     /**

@@ -11,66 +11,64 @@ void LCD::cycles(uint16 elapsedCycles)
     currentElapsedCycles += elapsedCycles;
 
     // TODO: GPU timing should not be constant
-    if (currentMode == Mode::Mode0 && currentElapsedCycles >= 204)
+    // HBLANK ended
+    if (currentMode == Mode::HBLANK && currentElapsedCycles >= 204)
     {
         currentElapsedCycles = 0;
         if (memory.LY >= 143)
         {
-            memory.STAT = (memory.STAT & ~memory.STATBits.currentMode) | 1u;
-            currentMode = Mode::Mode1;
+            // start vblank
+            memory.STAT = (memory.STAT & ~memory.STATBits.currentMode) | memory.STATBits.currentModeVBlank;
+            currentMode = Mode::VBLANK;
             display.newFrameIsReady(buffer);
 
-            if (memory.STAT & memory.STATBits.mode1Enable)
-            {
-                memory.interruptRequest |= memory.interruptBits.lcdStat;
-            }
+            updateSTATIRQ();
             memory.interruptRequest |= memory.interruptBits.verticalBlank;
         }
         else
         {
-            memory.STAT = (memory.STAT & ~memory.STATBits.currentMode) | 2u;
-            ++memory.LY;
-            currentMode = Mode::Mode2;
+            // start OAM search
+            memory.STAT = (memory.STAT & ~memory.STATBits.currentMode) | memory.STATBits.currentModeOAM;
+            currentMode = Mode::OAM;
+            incrementLY();
 
-            if (memory.STAT & memory.STATBits.mode2Enable)
-            {
-                memory.interruptRequest |= memory.interruptBits.lcdStat;
-            }
+            updateSTATIRQ();
         }
     }
-    else if (currentMode == Mode::Mode2 && currentElapsedCycles >= 80)
+    // OAM read ended
+    else if (currentMode == Mode::OAM && currentElapsedCycles >= 80)
     {
-        currentMode = Mode::Mode3;
+        // start OAM and VRAM transfer
         currentElapsedCycles = 0;
-        memory.STAT = (memory.STAT & ~memory.STATBits.currentMode) | 3u;
+        currentMode = Mode::Transfer;
+        memory.STAT = (memory.STAT & ~memory.STATBits.currentMode) | memory.STATBits.currentModeDataTransfer;
     }
-    else if (currentMode == Mode::Mode3 && currentElapsedCycles >= 172)
+    // OAM and VRAM read ended
+    else if (currentMode == Mode::Transfer && currentElapsedCycles >= 172)
     {
+        // Draw a line and start HBLANK
+        currentElapsedCycles = 0;
+        currentMode = Mode::HBLANK;
+        memory.STAT = (memory.STAT & ~memory.STATBits.currentMode) | memory.STATBits.currentModeHBlank;
         drawLine();
-        currentMode = Mode::Mode0;
-        currentElapsedCycles = 0;
-        memory.STAT = (memory.STAT & ~memory.STATBits.currentMode) | 0u;
 
-        if (memory.STAT & memory.STATBits.mode0Enable)
-        {
-            memory.interruptRequest |= memory.interruptBits.lcdStat;
-        }
+        updateSTATIRQ();
     }
-    else if (currentMode == Mode::Mode1 && currentElapsedCycles >= 456)
+    // VBLANK ended a line
+    else if (currentMode == Mode::VBLANK && currentElapsedCycles >= 456)
     {
         currentElapsedCycles = 0;
-        ++memory.LY;
+        incrementLY();
 
         if (memory.LY > 153)
         {
-            currentMode = Mode::Mode2;
-            memory.STAT = (memory.STAT & ~memory.STATBits.currentMode) | 2u;
-            memory.LY = 0;
+            // VBLANK ended all lines
+            // OAM search start
+            currentMode = Mode::OAM;
+            memory.STAT = (memory.STAT & ~memory.STATBits.currentMode) | memory.STATBits.currentModeOAM;
+            setLY(0);
 
-            if (memory.STAT & memory.STATBits.mode2Enable)
-            {
-                memory.interruptRequest |= memory.interruptBits.lcdStat;
-            }
+            updateSTATIRQ();
         }
     }
 }
@@ -137,4 +135,61 @@ void LCD::drawLine()
             buffer[(screenX + (screenY * WIDTH)) * 3 + 2] = SFMLColor[2];
         }
     }
+}
+
+void LCD::incrementLY()
+{
+    ++memory.LY;
+    updateLY();
+}
+
+void LCD::setLY(uint8 value)
+{
+    memory.LY = value;
+    updateLY();
+}
+
+void LCD::updateLY()
+{
+    if (memory.LY == memory.LYC)
+    {
+        memory.STAT |= memory.STATBits.LYCEquality;
+    }
+    else
+    {
+        memory.STAT &= ~memory.STATBits.LYCEquality;
+    }
+}
+
+void LCD::updateSTATIRQ()
+{
+    bool newSignalStatus = false;
+
+    if (memory.LY == memory.LYC && (memory.STAT & memory.STATBits.LYCInterruptEnable))
+    {
+        newSignalStatus = true;
+    }
+
+    if (currentMode == Mode::HBLANK && (memory.STAT & memory.STATBits.HBlankInterruptEnable))
+    {
+        newSignalStatus = true;
+    }
+
+    if (currentMode == Mode::OAM && (memory.STAT & memory.STATBits.OAMInterruptEnable))
+    {
+        newSignalStatus = true;
+    }
+
+    // According to cycle accurate gameboy guide, it OAM interrupt enable also trigger it
+    if (currentMode == Mode::VBLANK && (memory.STAT & (memory.STATBits.VBlankInterruptEnable | memory.STATBits.OAMInterruptEnable)))
+    {
+        newSignalStatus = true;
+    }
+
+    // If signal goes from low to high
+    if (!STATIRQSignal && newSignalStatus)
+    {
+        memory.interruptRequest |= memory.interruptBits.STAT;
+    }
+    STATIRQSignal = newSignalStatus;
 }
