@@ -135,6 +135,20 @@ void LCD::drawLine()
             buffer[(screenX + (screenY * WIDTH)) * 3 + 2] = SFMLColor[2];
         }
     }
+
+    drawSprites();
+}
+
+void LCD::drawSprites()
+{
+    // Up to 40 sprites readable ([*sprites, *(sprites+40)[
+    size_t spritesRenderedAmount = 0;
+    auto *sprites = reinterpret_cast<SpriteAttribute*>(memory.oamRAM);
+
+    for (size_t spriteIndex = 0, spritesRenderedAmount = 0; spriteIndex < 40 && spritesRenderedAmount < 10; ++spriteIndex)
+    {
+        SpriteAttribute sprite = sprites[spriteIndex];
+    }
 }
 
 void LCD::incrementLY()

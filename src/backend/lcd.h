@@ -73,7 +73,30 @@ private:
 
     std::vector<uint8> buffer = std::vector<uint8>(WIDTH * HEIGHT * 3, 0);
 
+    /**
+     * Sprites attribute are located in OAM RAM. Each sprite attribute is 4 byte long.
+     * All fields are constant as we are only reading.
+     */
+    struct alignas(4) SpriteAttribute
+    {
+        const uint8 Y;
+        const uint8 X;
+        const uint8 tilesetId;
+        const uint8 flag;
+    };
+
+    const struct
+    {
+        // if value = 1: taken from palette1 else palette0
+        const uint8 paletteNumber = 1u << 4u;
+        const uint8 XFlip = 1u << 5u;
+        const uint8 YFlip = 1u << 6u;
+        const uint8 priority = 1u << 7u;
+    } spriteAttributeFlagBits;
+
     void drawLine();
+    void drawSprites();
+
     void incrementLY();
     void setLY(uint8 value);
     void updateLY();

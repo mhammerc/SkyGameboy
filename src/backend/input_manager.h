@@ -5,8 +5,6 @@
 #include "../frontend/interfaces/i_input.h"
 #include "virtual_memory.h"
 
-#include "dbg.h"
-
 class InputManager
 {
 public:
@@ -75,7 +73,6 @@ public:
         if ((previousJoypadButtons & memory.joypadButtonsBits.inputBits) == memory.joypadButtonsBits.inputBits
             && (memory.joypadButtons & memory.joypadButtonsBits.inputBits) != memory.joypadButtonsBits.inputBits)
         {
-            dbg("trigger joypad");
             memory.interruptRequest |= memory.interruptBits.joypad;
         }
     };
