@@ -288,10 +288,10 @@ void VirtualMemory::write8(const uint16 address, uint8 value)
         // todo more cycle and bug accurate implementation
         if (address == 0xFF46)
         {
-//            if (value >= 0xF1)
-//            {
-//                return;
-//            }
+            if (value >= 0xF1)
+            {
+                return;
+            }
             const uint16 startAddress = value * 0x100;
             const uint16 sizeToCopy = 0xA0;
             for (uint16 i = 0; i < sizeToCopy; ++i)

@@ -64,10 +64,6 @@ private:
     std::array<uint8, 0xA0> oamRAM;
     std::array<uint8, 128> stackRAM;
     std::array<uint8, 0x2000> videoRAM;
-//    uint8 workingRAM[0x2000];
-//    uint8 oamRAM[0xA0];
-//    uint8 stackRAM[128];
-//    uint8 videoRAM[0x2000];
 
     /**
      * Hold if an interrupt is requested

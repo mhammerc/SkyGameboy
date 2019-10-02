@@ -53,9 +53,6 @@ public:
     }};
 
 private:
-    static const constexpr size_t WIDTH = 160;
-    static const constexpr size_t HEIGHT = 144;
-
     VirtualMemory &memory;
 public:
     IDisplay &display;
@@ -73,7 +70,7 @@ private:
     // Cycles elapsed for current mode
     uint16 currentElapsedCycles = 0;
 
-    std::vector<uint8> buffer = std::vector<uint8>(WIDTH * HEIGHT * 3, 0);
+    std::vector<uint8> buffer = std::vector<uint8>(SCREEN_WIDTH * SCREEN_HEIGHT * 3, 0);
 
     /**
      * Sprites attribute are located in OAM RAM. Each sprite attribute is 4 byte long.

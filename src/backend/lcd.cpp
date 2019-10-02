@@ -81,56 +81,57 @@ void LCD::drawLine()
 
 void LCD::drawBackground()
 {
+    if (!(memory.lcdControl & memory.lcdControlBits.backgroundEnable))
+    {
+        return;
+    }
+
     const uint16 backgroundTilemapAddr = memory.lcdControl & memory.lcdControlBits.backgroundTilemap ? 0x9C00 : 0x9800;
     const uint16 tilesetAddr = memory.lcdControl & memory.lcdControlBits.tileset ? 0x8000 : 0x8800;
     const bool tilemapSigned = tilesetAddr == 0x8800;
-    const uint16 paletteAddr = 0xFF47;
-    const uint8 palette = memory.read8(paletteAddr);
+    const uint8 palette = memory.backgroundPalette;
     const uint8 scrollX = memory.scrollX;
     const uint8 scrollY = memory.scrollY;
     const size_t screenY = memory.LY;
-    const uint8 bgY = (screenY + scrollY);// % HEIGHT;
+    const uint8 bgY = (screenY + scrollY) % 255;
 
-    for (size_t screenX = 0; screenX < WIDTH; ++screenX)
+    for (size_t screenX = 0; screenX < SCREEN_WIDTH; ++screenX)
     {
-        const uint8 bgX = (scrollX + screenX);// % WIDTH;
+        const uint8 bgX = (scrollX + screenX) % 255;
 
-        if (memory.lcdControl & memory.lcdControlBits.backgroundEnable)
-        {
-            // From current screen (X,Y), get address of current tilemap
-            const uint16 currentTilemapIndex = (bgX / 8u) + ((bgY / 8u) * 32);
-            const uint16 currentTilemapAddr = backgroundTilemapAddr + currentTilemapIndex;
+        // From current screen (X,Y), get address of current tilemap
+        const uint16 currentTilemapIndex = (bgX / 8u) + ((bgY / 8u) * 32u);
+        const uint16 currentTilemapAddr = backgroundTilemapAddr + currentTilemapIndex;
 
-            // Get current id of the tile being drawn
-            int16 currentTilesetId = 0;
-            if (tilemapSigned)
-                currentTilesetId = static_cast<int8>(memory.read8(currentTilemapAddr));
-            else
-                currentTilesetId = memory.read8(currentTilemapAddr);
+        // Get current id of the tile being drawn
+        int16 currentTilesetId = 0;
+        if (tilemapSigned)
+            currentTilesetId = static_cast<int8>(memory.read8(currentTilemapAddr)) + 128;
+        else
+            currentTilesetId = memory.read8(currentTilemapAddr);
 
-            // Get address to read that tile
-            const uint16 currentTilesetAddr = (currentTilesetId * 16) + tilesetAddr;
+        // Get address to read that tile
+        const uint16 currentTilesetAddr = tilesetAddr + (currentTilesetId * 16);
 
-            // Get position inside the tile
-            const uint8 tilePosX = 7 - (bgX % 8u); // says which bit to read
-            const uint8 tilePosY = bgY % 8u * 2; // says which bytes (two bytes per line) to read
+        // Get position inside the tile
+        const uint16 tilePosX = 7 - (bgX % 8u); // says which bit to read
+        const uint16 tilePosY = bgY % 8u * 2; // says which bytes (two bytes per line) to read
 
-            // address of both bytes for the current line of the tile
-            const uint8 tile0 = memory.read8(currentTilesetAddr + tilePosY + 0);
-            const uint8 tile1 = memory.read8(currentTilesetAddr + tilePosY + 1);
+        // address of both bytes for the current line of the tile
+        const uint8 tile0 = memory.read8(currentTilesetAddr + tilePosY + 0u);
+        const uint8 tile1 = memory.read8(currentTilesetAddr + tilePosY + 1u);
 
-            // actual DMG color of the pixel [0;3]
-            const uint8 color = ((tile0 >> tilePosX) & 1u) + (((tile1 >> tilePosX) & 1u) << 1);
-            const uint8 paletteColor = (palette >> (color * 2u) & 1u) + ((palette >> (color * 2u + 1) & 1u) << 1u);
+        // actual DMG color of the pixel [0;3]
+        const uint8 color = ((tile0 >> tilePosX) & 1u) + (((tile1 >> tilePosX) & 1u) << 1u);
+        const uint8 paletteColor = (palette >> (color * 2u) & 1u) + ((palette >> (color * 2u + 1) & 1u) << 1u);
 
-            // Get the SFML color
-            std::array<uint8, 3> SFMLColor = colors[paletteColor];
+        // Get the SFML color
+        std::array<uint8, 3> SFMLColor = colors[paletteColor];
 
-            // print it in the final buffer
-            buffer[(screenX + (screenY * WIDTH)) * 3 + 0] = SFMLColor[0];
-            buffer[(screenX + (screenY * WIDTH)) * 3 + 1] = SFMLColor[1];
-            buffer[(screenX + (screenY * WIDTH)) * 3 + 2] = SFMLColor[2];
-        }
+        // print it in the final buffer
+        buffer[(screenX + (screenY * SCREEN_WIDTH)) * 3 + 0] = SFMLColor[0];
+        buffer[(screenX + (screenY * SCREEN_WIDTH)) * 3 + 1] = SFMLColor[1];
+        buffer[(screenX + (screenY * SCREEN_WIDTH)) * 3 + 2] = SFMLColor[2];
     }
 }
 
@@ -225,6 +226,10 @@ void LCD::drawSprites()
 
             // Get the SFML color
             std::array<uint8, 3> SFMLColor = colors[paletteColor];
+            if (paletteColor == 0)
+            {
+                continue;
+            }
             // print it in the final buffer
             buffer[(pixelScreenPosition.x + (pixelScreenPosition.y * SCREEN_WIDTH)) * 3 + 0] = SFMLColor[0];
             buffer[(pixelScreenPosition.x + (pixelScreenPosition.y * SCREEN_WIDTH)) * 3 + 1] = SFMLColor[1];
