@@ -14,9 +14,15 @@ typedef int int32;
 
 namespace EmulatorConstants
 {
-    constexpr size_t SCREEN_WIDTH = 160;
-    constexpr size_t SCREEN_HEIGHT = 144;
+    constexpr int SCREEN_WIDTH = 160;
+    constexpr int SCREEN_HEIGHT = 144;
 }
+
+struct Vector2i
+{
+    int32 x;
+    int32 y;
+};
 
 /**
  * Parse two independant bytes to a word (16bit value) using little endian.

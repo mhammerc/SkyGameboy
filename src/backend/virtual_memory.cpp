@@ -284,8 +284,21 @@ void VirtualMemory::write8(const uint16 address, uint8 value)
             LYC = value;
         }
 
-        // todo:
-        // graphics: 0xff46 which is a only writable register
+        // DMA - Copy OAM data from 0x[value]00 to OAM ram
+        // todo more cycle and bug accurate implementation
+        if (address == 0xFF46)
+        {
+//            if (value >= 0xF1)
+//            {
+//                return;
+//            }
+            const uint16 startAddress = value * 0x100;
+            const uint16 sizeToCopy = 0xA0;
+            for (uint16 i = 0; i < sizeToCopy; ++i)
+            {
+                oamRAM[i] = read8(startAddress + i);
+            }
+        }
 
         if (address == 0xFF47)
         {

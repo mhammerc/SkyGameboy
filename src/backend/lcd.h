@@ -3,6 +3,8 @@
 
 #include <array>
 #include <vector>
+#include <algorithm>
+#include <gsl/gsl-lite.hpp>
 
 #include "virtual_memory.h"
 #include "../frontend/interfaces/i_display.h"
@@ -79,22 +81,24 @@ private:
      */
     struct alignas(4) SpriteAttribute
     {
-        const uint8 Y;
-        const uint8 X;
-        const uint8 tilesetId;
-        const uint8 flag;
+        uint8 y : 8;
+        uint8 x : 8;
+        uint8 tilesetId : 8;
+        uint8 flag : 8;
     };
 
     const struct
     {
-        // if value = 1: taken from palette1 else palette0
+        // if 1: taken from palette1 else palette0
         const uint8 paletteNumber = 1u << 4u;
         const uint8 XFlip = 1u << 5u;
         const uint8 YFlip = 1u << 6u;
+        // if 0: drawn over background and window. 1: drawn over background and window only if color (of background & window) is 0 (transparent)
         const uint8 priority = 1u << 7u;
     } spriteAttributeFlagBits;
 
     void drawLine();
+    void drawBackground();
     void drawSprites();
 
     void incrementLY();

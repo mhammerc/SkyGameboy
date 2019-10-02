@@ -1,6 +1,7 @@
 #ifndef FRACTAL_VIRTUAL_MEMORY_H
 #define FRACTAL_VIRTUAL_MEMORY_H
 
+#include <array>
 #include <cstddef>
 #include <memory>
 #include <iostream>
@@ -9,6 +10,8 @@
 #include "../general.h"
 #include "../files/file_reader_stack.h"
 #include "../files/file_reader_heap.h"
+
+using namespace EmulatorConstants;
 
 /**
  * It represent the MMU but also internal RAM & graphics RAM.
@@ -56,10 +59,15 @@ private:
         const uint8 upperBits = 1u << 5u | 1u << 6u;
     } ROMBankBits;
 
-    uint8 workingRAM[0x2000];
-    uint8 oamRAM[0xA0];
-    uint8 stackRAM[128];
-    uint8 videoRAM[0x2000];
+    // TODO std::array
+    std::array<uint8, 0x2000> workingRAM;
+    std::array<uint8, 0xA0> oamRAM;
+    std::array<uint8, 128> stackRAM;
+    std::array<uint8, 0x2000> videoRAM;
+//    uint8 workingRAM[0x2000];
+//    uint8 oamRAM[0xA0];
+//    uint8 stackRAM[128];
+//    uint8 videoRAM[0x2000];
 
     /**
      * Hold if an interrupt is requested

@@ -75,21 +75,17 @@ void LCD::cycles(uint16 elapsedCycles)
 
 void LCD::drawLine()
 {
-//    const struct
-//    {
-//        const uint8 x = 32;
-//        const uint8 y = 32;
-//    } backgroundTileSize;
-//
-//    const struct
-//    {
-//        const uint8 x = 8;
-//        const uint8 y = 8;
-//    } tileSize;
+    drawBackground();
+    drawSprites();
+}
 
+void LCD::drawBackground()
+{
     const uint16 backgroundTilemapAddr = memory.lcdControl & memory.lcdControlBits.backgroundTilemap ? 0x9C00 : 0x9800;
     const uint16 tilesetAddr = memory.lcdControl & memory.lcdControlBits.tileset ? 0x8000 : 0x8800;
     const bool tilemapSigned = tilesetAddr == 0x8800;
+    const uint16 paletteAddr = 0xFF47;
+    const uint8 palette = memory.read8(paletteAddr);
     const uint8 scrollX = memory.scrollX;
     const uint8 scrollY = memory.scrollY;
     const size_t screenY = memory.LY;
@@ -125,9 +121,10 @@ void LCD::drawLine()
 
             // actual DMG color of the pixel [0;3]
             const uint8 color = ((tile0 >> tilePosX) & 1u) + (((tile1 >> tilePosX) & 1u) << 1);
+            const uint8 paletteColor = (palette >> (color * 2u) & 1u) + ((palette >> (color * 2u + 1) & 1u) << 1u);
 
             // Get the SFML color
-            std::array<uint8, 3> SFMLColor = colors[color];
+            std::array<uint8, 3> SFMLColor = colors[paletteColor];
 
             // print it in the final buffer
             buffer[(screenX + (screenY * WIDTH)) * 3 + 0] = SFMLColor[0];
@@ -135,19 +132,104 @@ void LCD::drawLine()
             buffer[(screenX + (screenY * WIDTH)) * 3 + 2] = SFMLColor[2];
         }
     }
-
-    drawSprites();
 }
 
 void LCD::drawSprites()
 {
-    // Up to 40 sprites readable ([*sprites, *(sprites+40)[
-    size_t spritesRenderedAmount = 0;
-    auto *sprites = reinterpret_cast<SpriteAttribute*>(memory.oamRAM);
-
-    for (size_t spriteIndex = 0, spritesRenderedAmount = 0; spriteIndex < 40 && spritesRenderedAmount < 10; ++spriteIndex)
+    if (!(memory.lcdControl & memory.lcdControlBits.spritesEnable))
     {
-        SpriteAttribute sprite = sprites[spriteIndex];
+        return;
+    }
+
+    // Up to 40 sprites readable
+    std::array<SpriteAttribute, 40> sprites {};
+    memcpy(sprites.data(), memory.oamRAM.data(), sizeof(SpriteAttribute) * 40);
+
+    // Draw a max of 10 sprites
+    std::vector<SpriteAttribute> spritesToDraw {};
+    spritesToDraw.reserve(10);
+
+    // Are sprite 8x16 (true) or 8x8 (false)? If true, LSB of `tilesetId` is ignored
+    const bool areSpritesBig = memory.lcdControl & memory.lcdControlBits.spriteSize;
+    Vector2i spriteSize = {8, 8};
+    const uint8 bytesPerSprite = areSpritesBig ? 32 : 16;
+    spriteSize.y = areSpritesBig ? 16 : 8;
+
+    // Go through each of the 40 sprites and find which sprite will be drawn. Max of 10 sprites.
+    // When sprites overlap with same X coordinates, firsts sprites in OAM table have priority (sprites[0] have priority over sprites[1])
+    for (auto it = sprites.cbegin(); it != sprites.cend() && spritesToDraw.size() <= 10; ++it)
+    {
+        const SpriteAttribute &sprite = *it;
+        Vector2i screenPosition { sprite.x - 8, sprite.y - 16};
+
+        // Does it fit on screen for current line?
+        if (screenPosition.y <= memory.LY && screenPosition.y + spriteSize.y > memory.LY
+            && screenPosition.x >= 0 && screenPosition.x < SCREEN_WIDTH)
+        {
+            spritesToDraw.push_back(sprite);
+        }
+    }
+
+    // Smaller X coordinate sprites have higher priority. Meanwhile, on same X coordinate, first sprite is priority.
+    // Sort sprites to have higher x first (which will be drawn first)
+    std::sort(spritesToDraw.begin(), spritesToDraw.end(), [](SpriteAttribute &a, SpriteAttribute &b)
+    {
+        return a.x > b.x;
+    });
+
+    const uint16 tilesetAddr = 0x8000;
+    // Sprite are ready to be drawn first to last
+    for (auto sprite : spritesToDraw)
+    {
+        Vector2i screenPosition { sprite.x - 8, sprite.y - 16};
+        const uint8 currentLine = memory.LY;
+        const size_t lineInSprite = currentLine - screenPosition.y;
+
+        const bool XFlip = sprite.flag & spriteAttributeFlagBits.XFlip;
+        const bool YFlip = sprite.flag & spriteAttributeFlagBits.YFlip;
+        const uint16 paletteAddr = (sprite.flag & spriteAttributeFlagBits.paletteNumber) ? 0xFF49 : 0xFF48;
+        const uint8 palette = memory.read8(paletteAddr);
+
+        // On 8x16 sprite mode, LSB is ignored
+        uint8 tilesetId = sprite.tilesetId;
+        if (areSpritesBig)
+        {
+            tilesetId &= ~(1u);
+        }
+        const uint16 currentTileAddr = (tilesetId * bytesPerSprite) + tilesetAddr;
+        const uint16 currentTileLineAddr = currentTileAddr + lineInSprite * 2;
+        for (size_t i = 0; i < 8; ++i)
+        {
+            Vector2i pixelScreenPosition { screenPosition.x + static_cast<int32>(i), memory.LY};
+
+            // Get position inside the tile
+            const uint8 tilePosX = XFlip ? i : 7 - i; // says which bit to read
+            const uint8 tilePosY = YFlip ? (spriteSize.y * 2) - lineInSprite * 2 : lineInSprite * 2; // says which bytes (two bytes per line) to read
+
+            // address of both bytes for the current line of the tile
+            const uint8 tile0 = memory.read8(currentTileAddr + tilePosY + 0);
+            const uint8 tile1 = memory.read8(currentTileAddr + tilePosY + 1);
+
+            // actual DMG color of the pixel [0;3]
+            const uint8 paletteIndex = ((tile0 >> tilePosX) & 1u) + (((tile1 >> tilePosX) & 1u) << 1u);
+            const uint8 paletteColor = (palette >> (paletteIndex * 2u) & 1u) + ((palette >> (paletteIndex * 2u + 1) & 1u) << 1u);
+
+            // We do not have priority, draw only if background & window below pixel is 0
+            if (sprite.flag & spriteAttributeFlagBits.priority)
+            {
+                if (colors[memory.backgroundPalette & 3u][0] != buffer[(pixelScreenPosition.x + (pixelScreenPosition.y * SCREEN_WIDTH)) * 3 + 0])
+                {
+                    continue;
+                }
+            }
+
+            // Get the SFML color
+            std::array<uint8, 3> SFMLColor = colors[paletteColor];
+            // print it in the final buffer
+            buffer[(pixelScreenPosition.x + (pixelScreenPosition.y * SCREEN_WIDTH)) * 3 + 0] = SFMLColor[0];
+            buffer[(pixelScreenPosition.x + (pixelScreenPosition.y * SCREEN_WIDTH)) * 3 + 1] = SFMLColor[1];
+            buffer[(pixelScreenPosition.x + (pixelScreenPosition.y * SCREEN_WIDTH)) * 3 + 2] = SFMLColor[2];
+        }
     }
 }
 

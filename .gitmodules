@@ -4,3 +4,6 @@
 [submodule "deps/dbg-macro"]
 	path = deps/dbg-macro
 	url = https://github.com/sharkdp/dbg-macro
+[submodule "deps/gsl-lite"]
+	path = deps/gsl-lite
+	url = https://github.com/martinmoene/gsl-lite
