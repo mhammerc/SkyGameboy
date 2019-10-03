@@ -96,6 +96,7 @@ private:
 
     void drawLine();
     void drawBackground();
+    void drawWindow();
     void drawSprites();
 
     void incrementLY();

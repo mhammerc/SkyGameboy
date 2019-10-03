@@ -266,6 +266,7 @@ void VirtualMemory::write8(const uint16 address, uint8 value)
         if (address == 0xFF40)
         {
             lcdControl = value;
+            std::cout << +(lcdControl & lcdControlBits.windowEnable) << std::endl;
         }
         if (address == 0xFF41)
         {
