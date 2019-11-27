@@ -45,7 +45,7 @@ private:
     InputManager &input;
     LCD &lcd;
 
-    static constexpr long int speedFactor = 1;
+    static constexpr long int speedFactor = 10;
     static constexpr long int cyclesPerSecond = 4194304 * speedFactor;
     static constexpr std::chrono::nanoseconds cycleTime = std::chrono::nanoseconds(static_cast<long int>(1e+9) / cyclesPerSecond);
     static constexpr std::chrono::milliseconds minimumSleepTime {5};

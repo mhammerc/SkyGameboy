@@ -4,6 +4,9 @@ SkyGameboy is another Gameboy emulator. It is a fun project for learning before 
 
 It have been written using C++17 and code readability and maintainability in mind.
 
+It can run Tetris, Super Mario Land and lot of others games. It is not feature-complete, some games won't work. It also
+still have bugs.
+
 ## Frontend and modularity
 
 The emulator itself live in `src/backend`.

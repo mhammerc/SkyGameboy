@@ -230,7 +230,7 @@ void LCD::drawSprites()
 
         // Does it fit on screen for current line?
         if (screenPosition.y <= memory.LY && screenPosition.y + spriteSize.y > memory.LY
-            && screenPosition.x >= 0 && screenPosition.x < SCREEN_WIDTH)
+            && screenPosition.x >= -7 && screenPosition.x < SCREEN_WIDTH)
         {
             spritesToDraw.push_back(sprite);
         }
@@ -267,6 +267,12 @@ void LCD::drawSprites()
         for (size_t i = 0; i < 8; ++i)
         {
             Vector2i pixelScreenPosition { screenPosition.x + static_cast<int32>(i), memory.LY};
+
+            if (pixelScreenPosition.x < 0 || pixelScreenPosition.x > SCREEN_WIDTH
+                || pixelScreenPosition.y < 0 || pixelScreenPosition.y > SCREEN_HEIGHT)
+            {
+                continue;
+            }
 
             // Get position inside the tile
             const uint8 tilePosX = XFlip ? i : 7 - i; // says which bit to read
